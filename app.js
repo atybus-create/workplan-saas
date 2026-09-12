@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const API_URL = 'https://n8n.atybuslab.com/webhook/workplan-auth-login';
+  const API_URL = 'https://n8n-pi.taild8d05f.ts.net/webhook/workplan-auth-login';
   const STORAGE_KEY = 'workplan_user';
 
   function parseUser(raw) {
