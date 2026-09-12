@@ -75,15 +75,15 @@
       <button id="assignDrawerClose" class="drawer-close" type="button" aria-label="Zamknij">×</button>
     </div>
     <div class="assign-body">
-      <section class="assign-step">
-        <div class="assign-step-head"><span class="step-no">1</span><div><strong>Wybierz zmianę</strong><small>Godziny są pobierane z konfiguracji dnia.</small></div></div>
-        <div id="assignShiftTabs" class="assign-shift-tabs"></div>
-      </section>
-
       <section class="assign-step people-step">
-        <div class="assign-step-head"><span class="step-no">2</span><div><strong>Wybierz dostępne osoby</strong><small>Najpierw pokazujemy pracowników z wymaganym skillem.</small></div></div>
+        <div class="assign-step-head"><span class="step-no">1</span><div><strong>Wybierz dostępne osoby</strong><small>Najpierw pokazujemy pracowników z wymaganym skillem, niżej pozostałych.</small></div></div>
         <label class="assign-search"><span>⌕</span><input id="assignEmployeeSearch" type="search" placeholder="Szukaj pracownika" autocomplete="off"></label>
         <div id="assignPeople"></div>
+      </section>
+
+      <section class="assign-step">
+        <div class="assign-step-head"><span class="step-no">2</span><div><strong>Przypisz zmianę</strong><small>Wybierz jedną ze zmian skonfigurowanych u góry dla tego dnia.</small></div></div>
+        <div id="assignShiftTabs" class="assign-shift-tabs"></div>
       </section>
 
       <div class="assign-sticky-footer">
