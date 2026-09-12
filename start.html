@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Workplan — Start</title>
+  <link rel="stylesheet" href="styles.css?v=20260912.1">
+</head>
+<body class="app-page" data-page="start">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-lockup sidebar-brand"><span class="brand-mark">W</span><span>Workplan</span></div>
+      <nav class="main-nav" aria-label="Główna nawigacja">
+        <a class="nav-item active" href="start.html"><span class="nav-icon">⌂</span><span>Start</span></a>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">◎</span><span>Pracownicy</span></button>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">▦</span><span>Planowanie</span></button>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">◷</span><span>Czas pracy</span></button>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">↗</span><span>Raporty</span></button>
+      </nav>
+      <div class="sidebar-bottom"><button class="nav-item" type="button" disabled><span class="nav-icon">⚙</span><span>Ustawienia</span></button></div>
+    </aside>
+
+    <main class="dashboard">
+      <header class="topbar">
+        <button id="menuToggle" class="menu-toggle" type="button" aria-label="Otwórz menu">☰</button>
+        <div><p class="eyebrow">Panel główny</p><h1>Dzień dobry, <span id="userName">Użytkowniku</span></h1></div>
+        <div class="user-menu"><div class="avatar" id="userAvatar">U</div><div class="user-meta"><strong id="userDisplay">Użytkownik</strong><span>Workplan</span></div><button id="logoutBtn" class="secondary-button" type="button">Wyloguj</button></div>
+      </header>
+
+      <section class="kpi-grid" aria-label="Kluczowe wskaźniki">
+        <article class="kpi-card"><div class="kpi-icon">👥</div><div><span>Pracowników zaplanowanych</span><strong>18</strong><small>+2 względem wczoraj</small></div></article>
+        <article class="kpi-card"><div class="kpi-icon">◈</div><div><span>Aktywne obszary pracy</span><strong>6</strong><small>2 obszary z pełną obsadą</small></div></article>
+        <article class="kpi-card"><div class="kpi-icon">◷</div><div><span>Zmian dziś</span><strong>11</strong><small>następna o 10:00</small></div></article>
+        <article class="kpi-card"><div class="kpi-icon">✓</div><div><span>Otwarte zadania</span><strong>9</strong><small>3 wymagają uwagi</small></div></article>
+        <article class="kpi-card accent"><div class="kpi-icon">↗</div><div><span>Punktualność</span><strong>96%</strong><small>stabilnie w tym tygodniu</small></div></article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel plan-panel">
+          <div class="panel-head"><div><p class="eyebrow">Plan dnia</p><h2>Dzisiaj</h2></div><span class="status-pill">W toku</span></div>
+          <div class="timeline">
+            <div class="timeline-item done"><time>06:00</time><div><strong>Start zmiany porannej</strong><span>Kompletacja · Pakowanie · Przyjęcia</span></div><b>12 osób</b></div>
+            <div class="timeline-item current"><time>10:00</time><div><strong>Wzmocnienie kompletacji</strong><span>Planowany transfer z przyjęć</span></div><b>+3 osoby</b></div>
+            <div class="timeline-item"><time>14:00</time><div><strong>Zmiana popołudniowa</strong><span>Pakowanie · Zwroty</span></div><b>8 osób</b></div>
+          </div>
+        </article>
+
+        <article class="panel team-panel">
+          <div class="panel-head"><div><p class="eyebrow">Status zespołu</p><h2>Obsada</h2></div><span class="metric">18 / 20</span></div>
+          <div class="team-stats"><div><span>Na stanowisku</span><strong>15</strong></div><div><span>Przerwa</span><strong>2</strong></div><div><span>Nieobecni</span><strong>1</strong></div></div>
+          <div class="progress"><i style="width:90%"></i></div><p class="panel-note">90% planowanej obsady jest obecnie dostępne.</p>
+        </article>
+
+        <article class="panel activity-panel">
+          <div class="panel-head"><div><p class="eyebrow">Aktywność w ciągu dnia</p><h2>Obciążenie zespołu</h2></div><span class="metric">78%</span></div>
+          <div class="chart" aria-label="Przykładowy wykres aktywności"><i style="--h:28%"></i><i style="--h:42%"></i><i style="--h:58%"></i><i style="--h:72%"></i><i style="--h:66%"></i><i style="--h:86%"></i><i style="--h:78%"></i><i style="--h:92%"></i><i style="--h:70%"></i><i style="--h:54%"></i></div><div class="chart-axis"><span>06</span><span>08</span><span>10</span><span>12</span><span>14</span><span>16</span></div>
+        </article>
+
+        <article class="panel shifts-panel">
+          <div class="panel-head"><div><p class="eyebrow">Najbliższe zmiany</p><h2>Harmonogram</h2></div></div>
+          <ul class="shift-list"><li><time>10:00</time><div><strong>Kompletacja</strong><span>+3 osoby</span></div><em>za 2 h</em></li><li><time>14:00</time><div><strong>Zmiana popołudniowa</strong><span>8 osób</span></div><em>za 6 h</em></li><li><time>18:00</time><div><strong>Zamknięcie przyjęć</strong><span>2 osoby</span></div><em>za 10 h</em></li></ul>
+        </article>
+
+        <article class="panel quick-panel">
+          <div class="panel-head"><div><p class="eyebrow">Szybkie akcje</p><h2>Najczęstsze działania</h2></div></div>
+          <div class="quick-actions"><button type="button" disabled><span>＋</span><strong>Dodaj pracownika</strong><small>wkrótce</small></button><button type="button" disabled><span>▦</span><strong>Ułóż plan</strong><small>wkrótce</small></button><button type="button" disabled><span>↗</span><strong>Otwórz raport</strong><small>wkrótce</small></button></div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script src="app.js?v=20260912.1"></script>
+</body>
+</html>
