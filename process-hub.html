@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Workplan — Proces Hub</title>
+  <link rel="stylesheet" href="styles.css?v=20260912.3">
+  <link rel="stylesheet" href="process-hub.css?v=20260912.1">
+</head>
+<body class="app-page process-page" data-page="process-hub">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-lockup sidebar-brand"><span class="brand-mark">W</span><span>Workplan</span></div>
+      <nav class="main-nav" aria-label="Główna nawigacja">
+        <a class="nav-item" href="start.html"><span class="nav-icon">⌂</span><span>Start</span></a>
+        <a class="nav-item" href="employees.html"><span class="nav-icon">◎</span><span>Pracownicy</span></a>
+        <a class="nav-item" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>
+        <a class="nav-item active" href="process-hub.html"><span class="nav-icon">▧</span><span>Proces Hub</span></a>
+        <a class="nav-item" href="time-plan.html"><span class="nav-icon">◷</span><span>Plan pracy</span></a>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">▦</span><span>Planowanie</span></button>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">↗</span><span>Raporty</span></button>
+      </nav>
+      <div class="sidebar-bottom"><button class="nav-item" type="button" disabled><span class="nav-icon">⚙</span><span>Ustawienia</span></button></div>
+    </aside>
+
+    <main class="dashboard process-dashboard">
+      <header class="topbar process-topbar">
+        <button id="menuToggle" class="menu-toggle" type="button" aria-label="Otwórz menu">☰</button>
+        <div class="process-title"><p class="eyebrow">Procesy operacyjne</p><h1>Proces Hub</h1><p>Katalog procesów wykorzystywanych w planowaniu, obsadzie i raportowaniu.</p></div>
+        <div class="topbar-actions"><button id="addProcessBtn" class="primary-button process-add" type="button"><span>＋</span><span>Dodaj proces</span></button><div class="user-menu"><div class="avatar" id="userAvatar">U</div><div class="user-meta"><strong id="userDisplay">Użytkownik</strong><span>Workplan</span></div><button id="logoutBtn" class="secondary-button" type="button">Wyloguj</button></div></div>
+      </header>
+
+      <section class="process-summary" aria-label="Podsumowanie procesów">
+        <article><span>Wszystkie procesy</span><strong id="processTotal">—</strong><small>Katalog procesów</small></article>
+        <article class="good"><span>Aktywne</span><strong id="processActive">—</strong><small>Dostępne w planowaniu</small></article>
+        <article class="muted-card"><span>Nieaktywne</span><strong id="processInactive">—</strong><small>Zachowane w historii</small></article>
+        <article><span>Aktualne przypisania</span><strong id="processAssignments">—</strong><small>Pracownicy w procesach dziś</small></article>
+      </section>
+
+      <section class="panel process-catalog-panel">
+        <div class="process-toolbar">
+          <div><p class="eyebrow">Katalog</p><h2>Procesy w organizacji</h2><p>Sortowanie i ograniczanie widoku działa bezpośrednio z nagłówków kolumn.</p></div>
+          <div class="process-controls">
+            <label class="process-search"><span>⌕</span><input id="processSearch" type="search" placeholder="Szukaj po nazwie lub opisie" autocomplete="off"></label>
+            <div class="status-filter" role="group" aria-label="Szybki filtr statusu"><button class="active" type="button" data-status="all">Wszystkie</button><button type="button" data-status="active">Aktywne</button><button type="button" data-status="inactive">Nieaktywne</button></div>
+          </div>
+        </div>
+
+        <div id="processLoading" class="process-state">Pobieranie katalogu…</div>
+        <div id="processError" class="process-state error" hidden></div>
+        <div id="processTableWrap" class="process-table-wrap" hidden>
+          <table class="process-table">
+            <thead><tr>
+              <th class="filterable-th" data-column="name"><div class="th-shell"><button class="column-sort-button" type="button" data-column="name">Proces <span class="sort-indicator">↑</span></button><button class="column-filter-button" type="button" data-column="name" aria-label="Filtruj procesy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="status"><div class="th-shell"><button class="column-sort-button" type="button" data-column="status">Status <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="status" aria-label="Filtruj status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="currentAssigned"><div class="th-shell"><button class="column-sort-button" type="button" data-column="currentAssigned">Pracownicy teraz <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="currentAssigned" aria-label="Filtruj przypisania"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="history"><div class="th-shell"><button class="column-sort-button" type="button" data-column="history">Historia planu <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="history" aria-label="Filtruj historię planu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="sortOrder"><div class="th-shell"><button class="column-sort-button" type="button" data-column="sortOrder">Kolejność <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="sortOrder" aria-label="Filtruj kolejność"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th>Akcja</th>
+            </tr></thead>
+            <tbody id="processRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="processColumnFilterPopover" class="process-column-filter-popover" hidden></div>
+
+  <div id="processBackdrop" class="process-backdrop" hidden></div>
+  <aside id="processDrawer" class="process-drawer" aria-hidden="true">
+    <div class="process-drawer-head"><div><p class="eyebrow" id="drawerModeLabel">Edycja procesu</p><h2 id="processDrawerTitle">Proces</h2><span id="processDrawerMeta"></span></div><button id="processDrawerClose" class="process-close" type="button" aria-label="Zamknij">×</button></div>
+    <form id="processForm" class="process-form">
+      <input id="processId" type="hidden">
+      <section class="process-form-section"><h3>Dane procesu</h3><div class="process-form-grid"><label class="field wide"><span>Nazwa procesu</span><input id="processName" type="text" maxlength="120" required placeholder="np. Kompletacja zamówień"></label><label class="field"><span>Status</span><select id="processStatus" class="control-select"><option value="true">Aktywny</option><option value="false">Nieaktywny</option></select></label><label class="field"><span>Kolejność</span><input id="processSortOrder" type="number" min="0" step="1" value="0"></label></div><label class="field"><span>Krótki opis</span><textarea id="processDescription" rows="6" maxlength="1000" required placeholder="Opisz, czego dotyczy proces i jaki jest jego podstawowy zakres."></textarea></label></section>
+
+      <section class="process-form-section process-history-note"><div class="history-marker">HISTORIA</div><h3>Procesy użyte w planie są chronione</h3><p>Dezaktywacja zachowuje wcześniejsze przypisania i dane raportowe. Trwałe usunięcie jest możliwe tylko dla procesu, który nigdy nie był użyty w planowaniu.</p></section>
+
+      <p id="processFormMessage" class="form-message" role="status" aria-live="polite"></p>
+      <div class="process-form-actions"><button id="deleteProcessBtn" class="danger-button" type="button">Usuń proces</button><div><button id="cancelProcessBtn" class="secondary-button" type="button">Anuluj</button><button id="saveProcessBtn" class="primary-button" type="submit">Zapisz proces</button></div></div>
+    </form>
+  </aside>
+
+  <div id="deleteProcessBackdrop" class="process-modal-backdrop" hidden></div>
+  <section id="deleteProcessModal" class="process-modal" aria-hidden="true">
+    <div class="delete-symbol">!</div><p class="eyebrow">Trwałe usunięcie</p><h2>Usunąć proces?</h2><p id="deleteProcessText">Proces zostanie trwale usunięty.</p><div class="delete-note">System pozwoli na usunięcie tylko wtedy, gdy proces nie ma żadnej historii przypisań, zapotrzebowania ani planu pracy. Jeżeli był używany, ustaw go jako <strong>Nieaktywny</strong>.</div><p id="deleteProcessMessage" class="form-message"></p><div class="process-modal-actions"><button id="deleteProcessCancel" class="secondary-button" type="button">Anuluj</button><button id="deleteProcessConfirm" class="danger-button solid" type="button">Usuń trwale</button></div>
+  </section>
+
+  <script src="process-hub.js?v=20260912.1"></script>
+</body>
+</html>
