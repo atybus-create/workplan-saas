@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Workplan — logowanie</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="brand-panel">
+      <div class="brand-mark">W</div>
+      <div>
+        <p class="eyebrow">Planowanie pracy</p>
+        <h1>Workplan</h1>
+        <p class="muted">Plan, wykonanie i czas pracy w jednym miejscu.</p>
+      </div>
+    </section>
+
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="card-head">
+        <p class="eyebrow">Panel administracyjny</p>
+        <h2 id="login-title">Zaloguj się</h2>
+        <p class="muted">Wprowadź login i hasło administratora.</p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <label>
+          <span>Login</span>
+          <input id="login" name="login" autocomplete="username" required />
+        </label>
+        <label>
+          <span>Hasło</span>
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <button id="submitBtn" type="submit">Zaloguj się</button>
+        <p id="message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
