@@ -40,7 +40,9 @@ jobs:
               if 'href="time-plan.html"' not in text:
                   marker = '<button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>'
                   text = text.replace(marker, time_link + '\n        ' + marker, 1)
-                  p.write_text(text, encoding='utf-8')
+              if 'skill-hub-fix.js' not in text:
+                  text = text.replace('</body>', '  <script src="skill-hub-fix.js?v=20260912.1"></script>\n</body>', 1)
+              p.write_text(text, encoding='utf-8')
       - uses: actions/configure-pages@v5
         with:
           enablement: true
