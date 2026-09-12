@@ -2,6 +2,7 @@
   'use strict';
 
   const API_BASE = 'https://n8n-pi.taild8d05f.ts.net/webhook';
+  const VIEW_URL = `${API_BASE}/workplan-time-plan`;
   const SAVE_URL = `${API_BASE}/workplan-time-plan-save`;
   const TEMPLATE_MANAGE_URL = `${API_BASE}/workplan-shift-template-manage`;
   const STORAGE_KEY = 'workplan_user';
@@ -139,24 +140,6 @@
     }
   }
 
-  document.addEventListener('click', (event) => {
-    const unassign = event.target.closest?.('[data-unassign-user]');
-    if (unassign) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      removeAssignedPerson(unassign);
-      return;
-    }
-    const templateDelete = event.target.closest?.('[data-template-delete]');
-    if (templateDelete) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      removeTemplate(templateDelete);
-    }
-  }, true);
-
   function updateDemandCard(card) {
     const totalInput = card.querySelector('[data-total-hours]');
     const personHoursInput = card.querySelector('[data-person-hours]');
@@ -175,7 +158,7 @@
     status.classList.toggle('pending', !balanced);
     const summary = status.querySelector('[data-distribution-summary]');
     const detail = status.querySelector('[data-distribution-detail]');
-    if (summary) summary.textContent = balanced ? `Rozdzielono ${fmt(distributed)} / ${fmt(total)} h` : `Rozdzielono ${fmt(distributed)} / ${fmt(total)} h`;
+    if (summary) summary.textContent = `Rozdzielono ${fmt(distributed)} / ${fmt(total)} h`;
     if (detail) {
       detail.textContent = balanced
         ? 'Całe zapotrzebowanie dnia jest rozdzielone na zmiany.'
@@ -202,7 +185,7 @@
     card.classList.toggle('covered', covered);
     coverage?.classList.toggle('ok', covered);
     coverage?.classList.toggle('shortage', !covered);
-    if (coverageText) coverageText.textContent = covered ? `Pokryte · +${fmt(Math.max(0, assigned - total))} h` : `Brakuje ${fmt(total - assigned)} h`;
+    if (coverageText) coverageText.textContent = covered ? `Pokryte · +${fmt(Math.max(0, assigned - total))} h` : `Brakuje ${fmt(Math.max(0, total - assigned))} h`;
 
     card.querySelectorAll('[data-shift-cell]').forEach((cell) => {
       const input = cell.querySelector('[data-shift-hours]');
@@ -219,9 +202,10 @@
     });
   }
 
-  function enhanceDemandCard(card) {
+  function enhanceDemandCard(card, demandRow) {
     if (card.dataset.dailyDemandPatched === '1') return;
     card.dataset.dailyDemandPatched = '1';
+
     const totalInput = card.querySelector('[data-total-hours]');
     const totalBox = totalInput?.closest('.metric-input');
     const shiftRail = card.querySelector('.shift-demand-rail');
@@ -233,33 +217,119 @@
     totalInput.removeAttribute('readonly');
     totalInput.setAttribute('min', '0');
     totalInput.setAttribute('step', '0.25');
+    if (demandRow) totalInput.value = String(round2(demandRow.totalHours || 0));
 
-    const status = document.createElement('div');
-    status.className = 'daily-demand-block';
-    status.innerHTML = '<div><strong>Podział zapotrzebowania na zmiany</strong><small data-distribution-detail></small></div><span data-distribution-summary></span>';
-    shiftRail.before(status);
+    let status = card.querySelector('.daily-demand-block');
+    if (!status) {
+      status = document.createElement('div');
+      status.className = 'daily-demand-block';
+      status.innerHTML = '<div><strong>Podział zapotrzebowania na zmiany</strong><small data-distribution-detail></small></div><span data-distribution-summary></span>';
+      shiftRail.before(status);
+    }
 
-    const oldShiftInputs = [...card.querySelectorAll('[data-shift-hours]')];
-    oldShiftInputs.forEach((oldInput) => {
+    const shiftInputs = [...card.querySelectorAll('[data-shift-hours]')];
+    shiftInputs.forEach((oldInput) => {
+      const shiftNo = Number(oldInput.dataset.shiftHours || 0);
+      const persisted = demandRow?.shiftParts?.find((row) => Number(row.shiftNo) === shiftNo);
       const clone = oldInput.cloneNode(true);
+      clone.value = String(round2(persisted?.requiredHours || 0));
       oldInput.replaceWith(clone);
       clone.addEventListener('input', () => updateDemandCard(card));
       clone.addEventListener('change', () => updateDemandCard(card));
     });
+
     totalInput.addEventListener('input', () => updateDemandCard(card));
     totalInput.addEventListener('change', () => updateDemandCard(card));
     card.querySelector('[data-person-hours]')?.addEventListener('input', () => updateDemandCard(card));
     updateDemandCard(card);
   }
 
-  function enhanceAllDemandCards() {
-    document.querySelectorAll('.demand-card').forEach(enhanceDemandCard);
+  async function hydrateDemandCards() {
+    const grid = document.getElementById('demandGrid');
+    const date = document.getElementById('planDate')?.value || '';
+    if (!grid || !date || !grid.querySelector('.demand-card')) return;
+    try {
+      const response = await fetch(`${VIEW_URL}?date=${encodeURIComponent(date)}&_=${Date.now()}`, { cache: 'no-store', credentials: 'omit' });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) return;
+      const demandMap = new Map((data.demand || []).map((row) => [String(row.processId), row]));
+      grid.querySelectorAll('.demand-card').forEach((card) => enhanceDemandCard(card, demandMap.get(String(card.dataset.process))));
+    } catch (_) {
+      grid.querySelectorAll('.demand-card').forEach((card) => enhanceDemandCard(card, null));
+    }
   }
+
+  async function saveDemandFromCard(card) {
+    if (!currentUser?.userId) return;
+    const date = document.getElementById('planDate')?.value || '';
+    const totalInput = card.querySelector('[data-total-hours]');
+    const totalHours = round2(Math.max(0, Number(totalInput?.value || 0)));
+    const shiftHours = [...card.querySelectorAll('[data-shift-hours]')].map((input) => ({
+      shiftNo: Number(input.dataset.shiftHours),
+      requiredHours: round2(Math.max(0, Number(input.value || 0)))
+    }));
+    const distributed = round2(shiftHours.reduce((sum, row) => sum + row.requiredHours, 0));
+    if (Math.abs(distributed - totalHours) > .02) {
+      setPageMessage(`Nie zapisano. Rozdział zmian daje ${fmt(distributed)} h, a zapotrzebowanie dnia wynosi ${fmt(totalHours)} h.`, true);
+      updateDemandCard(card);
+      return;
+    }
+
+    const button = card.querySelector('[data-save-demand]');
+    if (button) button.disabled = true;
+    try {
+      setPageMessage('Zapisywanie zapotrzebowania…');
+      await postForm(SAVE_URL, {
+        action: 'demand',
+        requestedBy: currentUser.userId,
+        date,
+        processId: card.dataset.process || '',
+        requiredSkillId: card.querySelector('[data-required-skill]')?.value || '',
+        totalHours: String(totalHours),
+        defaultHoursPerPerson: String(Math.max(.25, Number(card.querySelector('[data-person-hours]')?.value || 8))),
+        shiftHours: JSON.stringify(shiftHours)
+      });
+      setPageMessage('Zapotrzebowanie i podział na zmiany zostały zapisane.');
+      document.getElementById('planDate')?.dispatchEvent(new Event('change'));
+    } catch (error) {
+      setPageMessage(error.message || 'Nie udało się zapisać zapotrzebowania.', true);
+      if (button) button.disabled = false;
+    }
+  }
+
+  document.addEventListener('click', (event) => {
+    const saveDemand = event.target.closest?.('[data-save-demand]');
+    if (saveDemand) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      const card = saveDemand.closest('.demand-card');
+      if (card) saveDemandFromCard(card);
+      return;
+    }
+
+    const unassign = event.target.closest?.('[data-unassign-user]');
+    if (unassign) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      removeAssignedPerson(unassign);
+      return;
+    }
+
+    const templateDelete = event.target.closest?.('[data-template-delete]');
+    if (templateDelete) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      removeTemplate(templateDelete);
+    }
+  }, true);
 
   const demandGrid = document.getElementById('demandGrid');
   if (demandGrid) {
-    const observer = new MutationObserver(() => enhanceAllDemandCards());
+    const observer = new MutationObserver(() => hydrateDemandCards());
     observer.observe(demandGrid, { childList: true, subtree: false });
   }
-  enhanceAllDemandCards();
+  hydrateDemandCards();
 })();
