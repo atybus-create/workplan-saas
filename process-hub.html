@@ -76,7 +76,7 @@
       <input id="processId" type="hidden">
       <section class="process-form-section"><h3>Dane procesu</h3><div class="process-form-grid"><label class="field wide"><span>Nazwa procesu</span><input id="processName" type="text" maxlength="120" required placeholder="np. Kompletacja zamówień"></label><label class="field"><span>Status</span><select id="processStatus" class="control-select"><option value="true">Aktywny</option><option value="false">Nieaktywny</option></select></label><label class="field"><span>Kolejność</span><input id="processSortOrder" type="number" min="0" step="1" value="0"></label></div><label class="field"><span>Krótki opis</span><textarea id="processDescription" rows="6" maxlength="1000" required placeholder="Opisz, czego dotyczy proces i jaki jest jego podstawowy zakres."></textarea></label></section>
 
-      <section class="process-form-section process-history-note"><div class="history-marker">HISTORIA</div><h3>Procesy użyte w planie są chronione</h3><p>Dezaktywacja zachowuje wcześniejsze przypisania i dane raportowe. Trwałe usunięcie jest możliwe tylko dla procesu, który nigdy nie był użyty w planowaniu.</p></section>
+      <section class="process-form-section process-history-note"><div class="history-marker">UWAGA</div><h3>Usunięcie procesu usuwa również jego powiązania</h3><p>Trwałe usunięcie kasuje proces oraz jego przypisania pracowników, plan pracy i zapotrzebowanie. Jeśli chcesz zachować historię, ustaw status <strong>Nieaktywny</strong>.</p></section>
 
       <p id="processFormMessage" class="form-message" role="status" aria-live="polite"></p>
       <div class="process-form-actions"><button id="deleteProcessBtn" class="danger-button" type="button">Usuń proces</button><div><button id="cancelProcessBtn" class="secondary-button" type="button">Anuluj</button><button id="saveProcessBtn" class="primary-button" type="submit">Zapisz proces</button></div></div>
@@ -85,9 +85,16 @@
 
   <div id="deleteProcessBackdrop" class="process-modal-backdrop" hidden></div>
   <section id="deleteProcessModal" class="process-modal" aria-hidden="true">
-    <div class="delete-symbol">!</div><p class="eyebrow">Trwałe usunięcie</p><h2>Usunąć proces?</h2><p id="deleteProcessText">Proces zostanie trwale usunięty.</p><div class="delete-note">System pozwoli na usunięcie tylko wtedy, gdy proces nie ma żadnej historii przypisań, zapotrzebowania ani planu pracy. Jeżeli był używany, ustaw go jako <strong>Nieaktywny</strong>.</div><p id="deleteProcessMessage" class="form-message"></p><div class="process-modal-actions"><button id="deleteProcessCancel" class="secondary-button" type="button">Anuluj</button><button id="deleteProcessConfirm" class="danger-button solid" type="button">Usuń trwale</button></div>
+    <div class="delete-symbol">!</div><p class="eyebrow">Trwałe usunięcie</p><h2>Usunąć proces?</h2><p id="deleteProcessText">Proces zostanie trwale usunięty razem z powiązanymi danymi.</p><div class="delete-note">Usunięcie jest trwałe. Razem z procesem zostaną usunięte jego przypisania pracowników, wpisy planu pracy i dane zapotrzebowania. Jeżeli chcesz zachować historię, ustaw proces jako <strong>Nieaktywny</strong>.</div><p id="deleteProcessMessage" class="form-message"></p><div class="process-modal-actions"><button id="deleteProcessCancel" class="secondary-button" type="button">Anuluj</button><button id="deleteProcessConfirm" class="danger-button solid" type="button">Usuń trwale</button></div>
   </section>
 
   <script src="process-hub.js?v=20260912.1"></script>
+  <script>
+    document.getElementById('deleteProcessBtn')?.addEventListener('click', () => {
+      const target = document.getElementById('deleteProcessText');
+      const name = document.getElementById('processDrawerTitle')?.textContent?.trim() || 'Proces';
+      if (target) target.textContent = `${name} zostanie trwale usunięty razem z przypisaniami i danymi planistycznymi.`;
+    });
+  </script>
 </body>
 </html>
