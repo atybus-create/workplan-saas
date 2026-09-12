@@ -5,6 +5,8 @@
   const VIEW_URL = `${API_BASE}/workplan-time-plan`;
   const SAVE_URL = `${API_BASE}/workplan-time-plan-save`;
   const SKILLS_URL = `${API_BASE}/workplan-skills`;
+  const TEMPLATES_URL = `${API_BASE}/workplan-shift-templates`;
+  const TEMPLATE_MANAGE_URL = `${API_BASE}/workplan-shift-template-manage`;
   const STORAGE_KEY = 'workplan_user';
 
   const parse = (raw) => { try { return JSON.parse(raw || 'null'); } catch { return null; } };
@@ -15,6 +17,8 @@
   const state = {
     data: null,
     skills: [],
+    templates: [],
+    selectedTemplateId: '',
     assignProcessId: '',
     assignShiftNo: 0,
     selectedIds: new Set()
@@ -36,7 +40,16 @@
     assignPeople: document.getElementById('assignPeople'),
     assignSearch: document.getElementById('assignEmployeeSearch'),
     assignMessage: document.getElementById('assignMessage'),
-    assignButton: document.getElementById('assignSelectedBtn')
+    assignButton: document.getElementById('assignSelectedBtn'),
+    templateDrawer: document.getElementById('templateDrawer'),
+    templateBackdrop: document.getElementById('templateBackdrop'),
+    templateName: document.getElementById('templateName'),
+    templateScope: document.getElementById('templateScope'),
+    templateMessage: document.getElementById('templateMessage'),
+    templateList: document.getElementById('templateList'),
+    templateApplyPanel: document.getElementById('templateApplyPanel'),
+    templateDateFrom: document.getElementById('templateDateFrom'),
+    templateDateTo: document.getElementById('templateDateTo')
   };
 
   const display = user.displayName || user.login || 'Użytkownik';
@@ -52,6 +65,25 @@
   const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' });
   const fmtHours = (n) => Number(n || 0).toLocaleString('pl-PL', { maximumFractionDigits: 2 });
   const esc = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+  const roundHours = (n) => Math.round(Number(n || 0) * 100) / 100;
+
+  function addDays(iso, days) {
+    const d = new Date(`${iso}T12:00:00`);
+    d.setDate(d.getDate() + Number(days || 0));
+    return d.toISOString().slice(0, 10);
+  }
+
+  function mondayOf(iso) {
+    const d = new Date(`${iso}T12:00:00`);
+    const day = d.getDay();
+    d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+    return d.toISOString().slice(0, 10);
+  }
+
+  function endOfMonth(iso) {
+    const [y, m] = iso.split('-').map(Number);
+    return new Date(Date.UTC(y, m, 0, 12)).toISOString().slice(0, 10);
+  }
 
   function calcHours(a, b) {
     if (!a || !b) return 0;
@@ -71,6 +103,7 @@
     return out;
   }
   function skillName(skillId) { return state.skills.find((s) => s.skillId === skillId)?.name || ''; }
+  function employeeSkillNames(employee) { return (employee?.skillIds || []).map(skillName).filter(Boolean); }
   function demandFor(processId) { return (state.data?.demand || []).find((d) => d.processId === processId); }
   function planForUser(userId) { return (state.data?.plans || []).find((p) => p.userId === userId); }
   function plansForProcess(processId) { return (state.data?.plans || []).filter((p) => p.processId === processId); }
@@ -105,7 +138,7 @@
     return plans
       .slice()
       .sort((a, b) => Number(a.shiftNo) - Number(b.shiftNo) || String(a.displayName || '').localeCompare(String(b.displayName || ''), 'pl'))
-      .map((p) => `<span class="assigned-pill"><em>Z${p.shiftNo}</em><b>${esc(p.displayName || p.userId)}</b><span>${esc(p.startTime)}–${esc(p.endTime)}</span>${canEdit ? `<button type="button" data-unassign-user="${esc(p.userId)}" aria-label="Usuń przypisanie">×</button>` : ''}</span>`)
+      .map((p) => `<span class="assigned-pill"><em>Z${p.shiftNo}</em><b>${esc(p.displayName || p.userId)}</b><span>${esc(p.startTime)}–${esc(p.endTime)}</span>${canEdit ? `<button type="button" data-unassign-user="${esc(p.userId)}">Usuń</button>` : ''}</span>`)
       .join('');
   }
 
@@ -117,9 +150,10 @@
       const savedByShift = shifts.map((s) => Number(d.shiftParts?.find((x) => Number(x.shiftNo) === Number(s.shiftNo))?.requiredHours || 0));
       const savedSum = savedByShift.reduce((a, b) => a + b, 0);
       const requiredByShift = savedSum > 0 || Number(d.totalHours || 0) === 0 ? savedByShift : equalSplit(Number(d.totalHours || 0), shifts.length);
-      const covered = Number(d.assignedHours || 0) >= Number(d.totalHours || 0);
-      const requiredPeople = Number(d.totalHours || 0) > 0 ? Math.ceil(Number(d.totalHours || 0) / (Number(d.defaultHoursPerPerson || 8) || 8)) : 0;
-      const gap = Number(d.assignedHours || 0) - Number(d.totalHours || 0);
+      const calculatedTotal = roundHours(requiredByShift.reduce((a, b) => a + b, 0));
+      const covered = Number(d.assignedHours || 0) >= calculatedTotal;
+      const requiredPeople = calculatedTotal > 0 ? Math.ceil(calculatedTotal / (Number(d.defaultHoursPerPerson || 8) || 8)) : 0;
+      const gap = Number(d.assignedHours || 0) - calculatedTotal;
       const coverageText = covered ? `Pokryte · +${fmtHours(Math.max(0, gap))} h` : `Brakuje ${fmtHours(Math.abs(gap))} h`;
 
       const shiftRail = shifts.map((s, index) => {
@@ -135,9 +169,9 @@
         <div class="demand-main">
           <div class="process-name"><strong>${esc(d.name)}</strong><small><b data-required-people>${requiredPeople}</b> os. przy <b data-person-hours-label>${fmtHours(d.defaultHoursPerPerson || 8)}</b> h/os.</small></div>
           <div class="process-skill"><label>Wymagany skill</label><select data-required-skill ${canEdit ? '' : 'disabled'}>${skillOptions(d.requiredSkillId || '')}</select></div>
-          <div class="metric-input"><label>Zapotrzebowanie</label><input type="number" min="0" step="0.25" data-total-hours value="${Number(d.totalHours || 0)}" ${canEdit ? '' : 'disabled'}></div>
+          <div class="metric-input"><label>Razem godzin</label><input type="number" data-total-hours value="${calculatedTotal}" readonly></div>
           <div class="metric-input"><label>h / osobę</label><input type="number" min="0.25" max="24" step="0.25" data-person-hours value="${Number(d.defaultHoursPerPerson || 8)}" ${canEdit ? '' : 'disabled'}></div>
-          <div class="coverage ${covered ? 'ok' : 'shortage'}"><strong><b data-assigned-total>${fmtHours(d.assignedHours)}</b> / <b data-required-total>${fmtHours(d.totalHours)}</b> h</strong><span data-coverage-text>${coverageText}</span></div>
+          <div class="coverage ${covered ? 'ok' : 'shortage'}"><strong><b data-assigned-total>${fmtHours(d.assignedHours)}</b> / <b data-required-total>${fmtHours(calculatedTotal)}</b> h</strong><span data-coverage-text>${coverageText}</span></div>
           <div class="demand-actions"><button class="primary-button assign-button" type="button" data-assign ${canEdit && shifts.length ? '' : 'disabled'}>Przypisz osoby</button><button class="secondary-button demand-save" type="button" data-save-demand ${canEdit ? '' : 'disabled'}>Zapisz zapotrzebowanie</button></div>
         </div>
         <div class="shift-demand-rail">${shiftRail || '<div class="process-demand-note">Najpierw skonfiguruj zmiany dla tego dnia.</div>'}</div>
@@ -151,16 +185,12 @@
       const personHours = card.querySelector('[data-person-hours]');
       const skill = card.querySelector('[data-required-skill]');
       const shiftInputs = [...card.querySelectorAll('[data-shift-hours]')];
-
-      const refresh = () => refreshDemandCard(card);
-      total?.addEventListener('change', () => {
-        const split = equalSplit(Number(total.value || 0), shiftInputs.length);
-        shiftInputs.forEach((input, index) => { input.value = split[index] ?? 0; });
-        refresh();
-      });
-      total?.addEventListener('input', refresh);
-      personHours?.addEventListener('input', refresh);
-      shiftInputs.forEach((input) => input.addEventListener('input', refresh));
+      const syncTotal = () => {
+        if (total) total.value = roundHours(shiftInputs.reduce((sum, input) => sum + Number(input.value || 0), 0));
+        refreshDemandCard(card);
+      };
+      personHours?.addEventListener('input', () => refreshDemandCard(card));
+      shiftInputs.forEach((input) => input.addEventListener('input', syncTotal));
       skill?.addEventListener('change', () => { if (demandRow) demandRow.requiredSkillId = skill.value; });
       card.querySelector('[data-save-demand]')?.addEventListener('click', () => saveDemand(card));
       card.querySelector('[data-assign]')?.addEventListener('click', () => openAssignDrawer(card.dataset.process));
@@ -212,12 +242,14 @@
 
   async function saveDemand(card) {
     try {
-      const shiftHours = [...card.querySelectorAll('[data-shift-hours]')].map((input) => ({ shiftNo: Number(input.dataset.shiftHours), requiredHours: Number(input.value || 0) }));
+      const shiftHours = [...card.querySelectorAll('[data-shift-hours]')].map((input) => ({ shiftNo: Number(input.dataset.shiftHours), requiredHours: roundHours(input.value) }));
+      const totalHours = roundHours(shiftHours.reduce((sum, row) => sum + row.requiredHours, 0));
+      card.querySelector('[data-total-hours]').value = totalHours;
       await apiSave({
         action: 'demand',
         processId: card.dataset.process,
         requiredSkillId: card.querySelector('[data-required-skill]').value,
-        totalHours: card.querySelector('[data-total-hours]').value,
+        totalHours,
         defaultHoursPerPerson: card.querySelector('[data-person-hours]').value,
         shiftHours: JSON.stringify(shiftHours)
       });
@@ -227,21 +259,11 @@
   async function cancelPlan(userId) {
     const plan = planForUser(userId);
     if (!plan || !canEdit) return;
+    const name = plan.displayName || userId;
+    if (!window.confirm(`Usunąć ${name} z planu na ${els.date.value}?`)) return;
     try {
       await apiSave({ action: 'plan', userId, processId: plan.processId, shiftNo: plan.shiftNo, startTime: plan.startTime, endTime: plan.endTime, status: 'cancelled' });
     } catch (error) { els.message.textContent = error.message; }
-  }
-
-  function bestShiftForProcess(demand) {
-    const shifts = state.data?.shifts || [];
-    if (!shifts.length) return 0;
-    const parts = demand?.shiftParts || [];
-    const ranked = shifts.map((shift) => {
-      const part = parts.find((p) => Number(p.shiftNo) === Number(shift.shiftNo));
-      const gap = Number(part?.assignedHours || 0) - Number(part?.requiredHours || 0);
-      return { shiftNo: Number(shift.shiftNo), gap };
-    }).sort((a, b) => a.gap - b.gap);
-    return ranked[0]?.shiftNo || Number(shifts[0].shiftNo);
   }
 
   function openAssignDrawer(processId) {
@@ -251,7 +273,7 @@
     const card = els.demandGrid.querySelector(`[data-process="${CSS.escape(processId)}"]`);
     if (card) demand.requiredSkillId = card.querySelector('[data-required-skill]')?.value || demand.requiredSkillId || '';
     state.assignProcessId = processId;
-    state.assignShiftNo = bestShiftForProcess(demand);
+    state.assignShiftNo = 0;
     state.selectedIds.clear();
     els.assignSearch.value = '';
     els.assignMessage.textContent = '';
@@ -287,7 +309,6 @@
     }).join('');
     els.assignShiftTabs.querySelectorAll('[data-assign-shift]').forEach((button) => button.addEventListener('click', () => {
       state.assignShiftNo = Number(button.dataset.assignShift);
-      state.selectedIds.clear();
       renderAssignDrawer();
     }));
 
@@ -300,7 +321,12 @@
     if (!demand) return;
     const requiredSkillId = demand.requiredSkillId || '';
     const q = els.assignSearch.value.trim().toLowerCase();
-    const employees = (state.data?.employees || []).filter((e) => e.available !== false).filter((e) => !q || `${e.displayName || ''} ${e.login || ''}`.toLowerCase().includes(q));
+    const employees = (state.data?.employees || [])
+      .filter((e) => e.available !== false)
+      .filter((e) => {
+        const haystack = `${e.displayName || ''} ${e.login || ''} ${employeeSkillNames(e).join(' ')}`.toLowerCase();
+        return !q || haystack.includes(q);
+      });
     const matching = requiredSkillId ? employees.filter((e) => (e.skillIds || []).includes(requiredSkillId)) : [];
     const others = requiredSkillId ? employees.filter((e) => !(e.skillIds || []).includes(requiredSkillId)) : employees;
 
@@ -312,9 +338,8 @@
 
     els.assignPeople.querySelectorAll('.person-choice').forEach((row) => {
       const checkbox = row.querySelector('input');
-      if (checkbox.disabled) return;
       row.addEventListener('click', (event) => {
-        if (event.target === checkbox) return;
+        if (event.target === checkbox || checkbox.disabled) return;
         checkbox.checked = !checkbox.checked;
         checkbox.dispatchEvent(new Event('change'));
       });
@@ -328,14 +353,19 @@
 
   function personChoiceHtml(employee, qualified) {
     const plan = planForUser(employee.userId);
-    const same = plan && plan.processId === state.assignProcessId && Number(plan.shiftNo) === Number(state.assignShiftNo);
+    const same = !!(state.assignShiftNo && plan && plan.processId === state.assignProcessId && Number(plan.shiftNo) === Number(state.assignShiftNo));
     const selected = state.selectedIds.has(employee.userId);
     let planLabel = 'Wolny w planie';
     let planClass = 'free';
     if (same) { planLabel = `Już przypisany · Z${plan.shiftNo} · ${plan.startTime}–${plan.endTime}`; planClass = ''; }
     else if (plan) { planLabel = `Zastąpi: ${plan.processName} · Z${plan.shiftNo} · ${plan.startTime}–${plan.endTime}`; planClass = 'conflict'; }
     const role = employee.role === 'leader' ? 'Lider' : 'Pracownik';
-    return `<label class="person-choice ${selected ? 'selected' : ''} ${same ? 'already' : ''}" data-user-id="${esc(employee.userId)}"><input type="checkbox" ${selected ? 'checked' : ''} ${same ? 'disabled' : ''}><div class="person-info"><strong>${esc(employee.displayName)}</strong><span>${role}${qualified ? ' · ma wymagany skill' : ''}</span></div><div class="person-plan-state ${planClass}">${esc(planLabel)}</div></label>`;
+    const skills = employeeSkillNames(employee);
+    const requiredName = skillName(demandFor(state.assignProcessId)?.requiredSkillId || '');
+    const skillHtml = skills.length
+      ? `<div class="person-skills">${skills.map((name) => `<span class="person-skill ${requiredName && name === requiredName ? 'required' : ''}">${esc(name)}</span>`).join('')}</div>`
+      : '<span class="person-no-skills">Brak przypisanych skilli</span>';
+    return `<label class="person-choice ${selected ? 'selected' : ''} ${same ? 'already' : ''}" data-user-id="${esc(employee.userId)}"><input type="checkbox" ${selected ? 'checked' : ''} ${same ? 'disabled' : ''}><div class="person-info"><strong>${esc(employee.displayName)}</strong><span>${role}${qualified ? ' · ma wymagany skill' : ''}</span>${skillHtml}</div><div class="person-plan-state ${planClass}">${esc(planLabel)}</div></label>`;
   }
 
   function updateAssignFooter() {
@@ -343,7 +373,7 @@
     const shift = shiftByNo(state.assignShiftNo);
     const hours = count * (shift ? shiftDuration(shift) : 0);
     document.getElementById('assignSelectedCount').textContent = `${count} ${count === 1 ? 'osoba' : 'osób'}`;
-    document.getElementById('assignSelectedHours').textContent = `${fmtHours(hours)} h do przypisania`;
+    document.getElementById('assignSelectedHours').textContent = shift ? `${fmtHours(hours)} h do przypisania · Z${shift.shiftNo}` : 'Wybierz zmianę poniżej';
     els.assignButton.disabled = !canEdit || !count || !shift;
   }
 
@@ -397,6 +427,145 @@
     catch (error) { els.shiftMessage.textContent = error.message; }
   }
 
+  function templateShiftRows(shifts) {
+    return (shifts || []).map((s) => ({ shiftNo: Number(s.shiftNo), name: String(s.name || `Zmiana ${s.shiftNo}`), startTime: s.startTime, endTime: s.endTime, active: true }));
+  }
+
+  async function templateManage(payload) {
+    const body = new URLSearchParams({ ...payload, requestedBy: user.userId });
+    const response = await fetch(TEMPLATE_MANAGE_URL, { method: 'POST', body, cache: 'no-store', credentials: 'omit' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.message || 'Nie udało się wykonać operacji na szablonie.');
+    return data;
+  }
+
+  async function loadTemplates() {
+    const response = await fetch(`${TEMPLATES_URL}?requestedBy=${encodeURIComponent(user.userId)}`, { cache: 'no-store', credentials: 'omit' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.message || 'Nie udało się pobrać szablonów.');
+    state.templates = Array.isArray(data.templates) ? data.templates : [];
+    renderTemplates();
+  }
+
+  async function openTemplateDrawer() {
+    if (!canEdit) return;
+    els.templateBackdrop.hidden = false;
+    els.templateDrawer.classList.add('open');
+    els.templateDrawer.setAttribute('aria-hidden', 'false');
+    els.templateMessage.textContent = 'Pobieranie szablonów…';
+    state.selectedTemplateId = '';
+    els.templateApplyPanel.hidden = true;
+    try { await loadTemplates(); els.templateMessage.textContent = ''; }
+    catch (error) { els.templateMessage.textContent = error.message; }
+  }
+
+  function closeTemplateDrawer() {
+    els.templateBackdrop.hidden = true;
+    els.templateDrawer.classList.remove('open');
+    els.templateDrawer.setAttribute('aria-hidden', 'true');
+    state.selectedTemplateId = '';
+  }
+
+  async function collectWeekPattern() {
+    const monday = mondayOf(els.date.value);
+    const dates = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+    const responses = await Promise.all(dates.map((date) => fetch(`${VIEW_URL}?date=${encodeURIComponent(date)}`, { cache: 'no-store', credentials: 'omit' })));
+    const payloads = await Promise.all(responses.map((response) => response.json().catch(() => ({}))));
+    const days = {};
+    payloads.forEach((data, index) => {
+      if (!responses[index].ok || !data.ok) throw new Error(`Nie udało się pobrać zmian dla ${dates[index]}.`);
+      days[String(index + 1)] = templateShiftRows(data.shifts || []);
+    });
+    return { days };
+  }
+
+  async function saveTemplate() {
+    const name = els.templateName.value.trim();
+    const scope = els.templateScope.value;
+    if (!name) { els.templateMessage.textContent = 'Podaj nazwę szablonu.'; return; }
+    els.templateMessage.textContent = scope === 'week' ? 'Pobieranie całego tygodnia…' : 'Zapisywanie szablonu…';
+    document.getElementById('templateSaveBtn').disabled = true;
+    try {
+      let pattern;
+      if (scope === 'day') {
+        const shifts = templateShiftRows(state.data?.shifts || []);
+        if (!shifts.length) throw new Error('Wybrany dzień nie ma skonfigurowanych zmian.');
+        pattern = { shifts };
+      } else {
+        pattern = await collectWeekPattern();
+        const count = Object.values(pattern.days).reduce((sum, rows) => sum + rows.length, 0);
+        if (!count) throw new Error('Wybrany tydzień nie ma skonfigurowanych zmian.');
+      }
+      await templateManage({ action: 'save', name, scope, patternJson: JSON.stringify(pattern) });
+      els.templateName.value = '';
+      els.templateMessage.textContent = 'Szablon zapisany.';
+      await loadTemplates();
+    } catch (error) { els.templateMessage.textContent = error.message; }
+    finally { document.getElementById('templateSaveBtn').disabled = false; }
+  }
+
+  function renderTemplates() {
+    document.getElementById('templateCount').textContent = state.templates.length;
+    els.templateList.innerHTML = state.templates.length ? state.templates.map((template) => {
+      let summary = 'Szablon zmian';
+      if (template.scope === 'day') summary = `${template.pattern?.shifts?.length || 0} zmian w dniu`;
+      else {
+        const days = template.pattern?.days || {};
+        const activeDays = Object.values(days).filter((rows) => Array.isArray(rows) && rows.length).length;
+        const shifts = Object.values(days).reduce((sum, rows) => sum + (Array.isArray(rows) ? rows.length : 0), 0);
+        summary = `${activeDays} dni · ${shifts} konfiguracji zmian`;
+      }
+      return `<article class="template-item"><div class="template-item-info"><strong>${esc(template.name)}</strong><span>${template.scope === 'week' ? 'Tydzień' : 'Dzień'} · ${esc(summary)}</span></div><div class="template-item-actions"><button type="button" data-template-apply="${esc(template.templateId)}">Zastosuj</button><button type="button" data-template-delete="${esc(template.templateId)}">Usuń</button></div></article>`;
+    }).join('') : '<div class="template-empty">Nie ma jeszcze zapisanych szablonów.</div>';
+
+    els.templateList.querySelectorAll('[data-template-apply]').forEach((button) => button.addEventListener('click', () => chooseTemplate(button.dataset.templateApply)));
+    els.templateList.querySelectorAll('[data-template-delete]').forEach((button) => button.addEventListener('click', () => deleteTemplate(button.dataset.templateDelete)));
+  }
+
+  function chooseTemplate(templateId) {
+    const template = state.templates.find((item) => item.templateId === templateId);
+    if (!template) return;
+    state.selectedTemplateId = templateId;
+    document.getElementById('templateApplyName').textContent = template.name;
+    els.templateDateFrom.value = els.date.value;
+    els.templateDateTo.value = addDays(els.date.value, 29);
+    els.templateApplyPanel.hidden = false;
+    els.templateApplyPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function deleteTemplate(templateId) {
+    const template = state.templates.find((item) => item.templateId === templateId);
+    if (!template || !window.confirm(`Usunąć szablon „${template.name}”?`)) return;
+    try {
+      await templateManage({ action: 'delete', templateId });
+      if (state.selectedTemplateId === templateId) els.templateApplyPanel.hidden = true;
+      await loadTemplates();
+      els.templateMessage.textContent = 'Szablon usunięty.';
+    } catch (error) { els.templateMessage.textContent = error.message; }
+  }
+
+  function setTemplateRange(value) {
+    const from = els.templateDateFrom.value || els.date.value;
+    if (value === 'month') els.templateDateTo.value = endOfMonth(from);
+    else els.templateDateTo.value = addDays(from, Math.max(0, Number(value) - 1));
+  }
+
+  async function applyTemplate() {
+    if (!state.selectedTemplateId) return;
+    const from = els.templateDateFrom.value;
+    const to = els.templateDateTo.value;
+    if (!from || !to) { els.templateMessage.textContent = 'Podaj zakres dat.'; return; }
+    const button = document.getElementById('templateApplyBtn');
+    button.disabled = true;
+    els.templateMessage.textContent = 'Stosowanie szablonu…';
+    try {
+      const result = await templateManage({ action: 'apply', templateId: state.selectedTemplateId, dateFrom: from, dateTo: to });
+      els.templateMessage.textContent = result.message || 'Szablon zastosowany.';
+      if (els.date.value >= from && els.date.value <= to) await load();
+    } catch (error) { els.templateMessage.textContent = error.message; }
+    finally { button.disabled = false; }
+  }
+
   async function load() {
     els.message.textContent = '';
     const [viewResponse, skillResponse] = await Promise.all([
@@ -413,9 +582,7 @@
   }
   async function safeLoad() { try { await load(); } catch (error) { els.message.textContent = error.message; } }
   function moveDay(delta) {
-    const d = new Date(`${els.date.value}T12:00:00`);
-    d.setDate(d.getDate() + delta);
-    els.date.value = d.toISOString().slice(0, 10);
+    els.date.value = addDays(els.date.value, delta);
     safeLoad();
   }
 
@@ -425,6 +592,7 @@
   document.getElementById('nextDay').onclick = () => moveDay(1);
   document.getElementById('todayBtn').onclick = () => { els.date.value = today(); safeLoad(); };
   document.getElementById('configureShiftsBtn').onclick = openShiftDrawer;
+  document.getElementById('shiftTemplatesBtn').onclick = openTemplateDrawer;
   document.getElementById('shiftDrawerClose').onclick = closeShiftDrawer;
   document.getElementById('shiftCancel').onclick = closeShiftDrawer;
   els.shiftBackdrop.onclick = closeShiftDrawer;
@@ -434,12 +602,22 @@
   els.assignBackdrop.onclick = closeAssignDrawer;
   els.assignSearch.oninput = renderPeopleChoices;
   els.assignButton.onclick = assignSelected;
+  document.getElementById('templateDrawerClose').onclick = closeTemplateDrawer;
+  els.templateBackdrop.onclick = closeTemplateDrawer;
+  document.getElementById('templateSaveBtn').onclick = saveTemplate;
+  document.getElementById('templateApplyClose').onclick = () => { state.selectedTemplateId = ''; els.templateApplyPanel.hidden = true; };
+  document.getElementById('templateApplyBtn').onclick = applyTemplate;
+  document.querySelectorAll('[data-template-range]').forEach((button) => button.addEventListener('click', () => setTemplateRange(button.dataset.templateRange)));
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     if (els.assignDrawer.classList.contains('open')) closeAssignDrawer();
+    else if (els.templateDrawer.classList.contains('open')) closeTemplateDrawer();
     else if (els.shiftDrawer.classList.contains('open')) closeShiftDrawer();
   });
-  if (!canEdit) document.getElementById('configureShiftsBtn').disabled = true;
+  if (!canEdit) {
+    document.getElementById('configureShiftsBtn').disabled = true;
+    document.getElementById('shiftTemplatesBtn').disabled = true;
+  }
 
   safeLoad();
 })();
