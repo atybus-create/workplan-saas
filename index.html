@@ -1,42 +1,45 @@
 <!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
   <title>Workplan — logowanie</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260912.1">
 </head>
-<body class="login-page">
+<body class="login-page" data-page="login">
   <main class="login-shell">
-    <section class="brand-panel">
-      <div class="brand-mark">W</div>
-      <div>
-        <p class="eyebrow">Planowanie pracy</p>
-        <h1>Workplan</h1>
-        <p class="muted">Plan, wykonanie i czas pracy w jednym miejscu.</p>
+    <section class="login-brand" aria-label="Workplan">
+      <div class="brand-lockup"><span class="brand-mark">W</span><span>Workplan</span></div>
+      <div class="brand-copy">
+        <p class="eyebrow">Planowanie pracy bez chaosu</p>
+        <h1>Twój dzień pracy.<br><span>Jedno miejsce.</span></h1>
+        <p>Planowanie zespołu, obszarów i czasu pracy w jednym czytelnym systemie.</p>
+      </div>
+      <div class="signal-card" aria-hidden="true">
+        <div class="signal-head"><span>Dzisiejszy plan</span><span class="live-dot">na żywo</span></div>
+        <div class="signal-bars"><i style="--h:42%"></i><i style="--h:67%"></i><i style="--h:54%"></i><i style="--h:82%"></i><i style="--h:73%"></i><i style="--h:91%"></i><i style="--h:78%"></i></div>
       </div>
     </section>
 
-    <section class="login-card" aria-labelledby="login-title">
-      <div class="card-head">
-        <h2 id="login-title">Zaloguj się</h2>
-        <p class="muted">Wprowadź login i hasło.</p>
+    <section class="login-card" aria-labelledby="loginTitle">
+      <div class="login-card-inner">
+        <div class="card-head">
+          <p class="eyebrow">Witaj ponownie</p>
+          <h2 id="loginTitle">Zaloguj się do Workplan</h2>
+          <p>Użyj danych dostępu przypisanych do Twojego konta.</p>
+        </div>
+        <form id="loginForm" novalidate>
+          <label class="field"><span>Login</span><input id="login" name="login" autocomplete="username" inputmode="text" required></label>
+          <label class="field"><span>Hasło</span><span class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" required><button id="togglePassword" class="icon-button" type="button" aria-label="Pokaż hasło">Pokaż</button></span></label>
+          <div class="form-row"><label class="check"><input id="rememberMe" type="checkbox"><span>Zapamiętaj mnie</span></label></div>
+          <button id="submitBtn" class="primary-button" type="submit"><span>Zaloguj się</span><span aria-hidden="true">→</span></button>
+          <p id="message" class="form-message" role="status" aria-live="polite"></p>
+        </form>
       </div>
-
-      <form id="loginForm" novalidate>
-        <label>
-          <span>Login</span>
-          <input id="login" name="login" autocomplete="username" required />
-        </label>
-        <label>
-          <span>Hasło</span>
-          <input id="password" name="password" type="password" autocomplete="current-password" required />
-        </label>
-        <button id="submitBtn" type="submit">Zaloguj się</button>
-        <p id="message" class="form-message" role="status" aria-live="polite"></p>
-      </form>
+      <p class="login-foot">Workplan · bezpieczny dostęp do przestrzeni pracy</p>
     </section>
   </main>
-  <script src="app.js"></script>
+  <script src="app.js?v=20260912.1"></script>
 </body>
 </html>
