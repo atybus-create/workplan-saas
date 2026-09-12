@@ -45,7 +45,26 @@
     skills: [],
     status: 'all',
     selected: null,
-    mode: 'edit'
+    mode: 'edit',
+    sort: { column: 'name', direction: 'asc' },
+    filters: {
+      name: null,
+      status: null,
+      difficulty: null,
+      training: null,
+      assignments: null,
+      category: null
+    },
+    filterPopoverColumn: null
+  };
+
+  const columnLabels = {
+    name: 'Skill',
+    status: 'Status',
+    difficulty: 'Trudność',
+    training: 'Szkolenie',
+    assignments: 'Przypisania',
+    category: 'Kategoria'
   };
 
   const loading = document.getElementById('skillLoading');
@@ -62,6 +81,7 @@
   const deleteModal = document.getElementById('deleteSkillModal');
   const deleteBackdrop = document.getElementById('deleteSkillBackdrop');
   const deleteMessage = document.getElementById('deleteSkillMessage');
+  const popover = document.getElementById('skillColumnFilterPopover');
 
   if (!isAdmin) addBtn.hidden = true;
 
@@ -80,18 +100,75 @@
 
   function updateSummary(summary = {}) {
     document.getElementById('skillTotal').textContent = summary.total ?? state.skills.length;
-    document.getElementById('skillActive').textContent = summary.active ?? state.skills.filter((s) => s.active).length;
+    document.getElementById('skillActiveCount').textContent = summary.active ?? state.skills.filter((s) => s.active).length;
     document.getElementById('skillInactive').textContent = summary.inactive ?? state.skills.filter((s) => !s.active).length;
     document.getElementById('skillAssignments').textContent = summary.assignments ?? state.skills.reduce((sum, s) => sum + Number(s.assignedCount || 0), 0);
   }
 
+  function valueFor(skill, column) {
+    if (column === 'name') return String(skill.name || 'Brak nazwy');
+    if (column === 'status') return skill.active ? 'Aktywny' : 'Nieaktywny';
+    if (column === 'difficulty') return String(Math.max(1, Math.min(5, Number(skill.difficulty || 1))));
+    if (column === 'training') return String(Math.max(0, Number(skill.trainingMinutes || 0)));
+    if (column === 'assignments') return String(Math.max(0, Number(skill.assignedCount || 0)));
+    if (column === 'category') return String(skill.category || 'Brak kategorii');
+    return '';
+  }
+
+  function displayFilterValue(column, value) {
+    if (column === 'difficulty') return `${value}/5`;
+    if (column === 'training') return formatTraining(Number(value));
+    if (column === 'assignments') return `${value} przypisań`;
+    return value;
+  }
+
+  function uniqueValues(column) {
+    const set = new Set(state.skills.map((skill) => valueFor(skill, column)));
+    const values = [...set];
+    if (['difficulty', 'training', 'assignments'].includes(column)) {
+      return values.sort((a, b) => Number(a) - Number(b));
+    }
+    return values.sort((a, b) => a.localeCompare(b, 'pl', { numeric: true, sensitivity: 'base' }));
+  }
+
   function filteredSkills() {
     const q = search.value.trim().toLowerCase();
-    return state.skills.filter((skill) => {
+    const filtered = state.skills.filter((skill) => {
       if (state.status === 'active' && !skill.active) return false;
       if (state.status === 'inactive' && skill.active) return false;
-      if (!q) return true;
-      return `${skill.name || ''} ${skill.description || ''} ${skill.onboarding || ''} ${skill.category || ''}`.toLowerCase().includes(q);
+      if (q && !`${skill.name || ''} ${skill.description || ''} ${skill.onboarding || ''} ${skill.category || ''}`.toLowerCase().includes(q)) return false;
+
+      return Object.entries(state.filters).every(([column, selected]) => {
+        if (selected === null) return true;
+        if (!selected.size) return false;
+        return selected.has(valueFor(skill, column));
+      });
+    });
+
+    const numeric = ['difficulty', 'training', 'assignments'].includes(state.sort.column);
+    const multiplier = state.sort.direction === 'asc' ? 1 : -1;
+    return filtered.sort((a, b) => {
+      const av = valueFor(a, state.sort.column);
+      const bv = valueFor(b, state.sort.column);
+      if (numeric) return multiplier * (Number(av) - Number(bv));
+      return multiplier * av.localeCompare(bv, 'pl', { numeric: true, sensitivity: 'base' });
+    });
+  }
+
+  function updateHeaderState() {
+    document.querySelectorAll('.skill-table th.filterable-th').forEach((th) => {
+      const column = th.dataset.column;
+      const filter = state.filters[column];
+      const sortActive = state.sort.column === column;
+      th.classList.toggle('sort-active', sortActive);
+      th.classList.toggle('filter-active', filter !== null);
+      const indicator = th.querySelector('.sort-indicator');
+      if (indicator) indicator.textContent = sortActive ? (state.sort.direction === 'asc' ? '↑' : '↓') : '↕';
+      const count = th.querySelector('.filter-count');
+      if (count) {
+        count.hidden = filter === null;
+        count.textContent = filter === null ? '' : String(filter.size);
+      }
     });
   }
 
@@ -104,9 +181,9 @@
         <td>${difficultyMarkup(skill.difficulty)}</td>
         <td><span class="training-time">${esc(formatTraining(skill.trainingMinutes))}</span></td>
         <td><span class="assignment-count">${Number(skill.assignedCount || 0)}</span></td>
-        <td>${skill.category ? `<span class="category-chip">${esc(skill.category)}</span>` : '<span class="table-muted">—</span>'}</td>
+        <td>${skill.category ? `<span class="category-chip">${esc(skill.category)}</span>` : '<span class="table-muted">Brak kategorii</span>'}</td>
         <td><button class="open-skill" type="button">Edytuj →</button></td>
-      </tr>`).join('') : '<tr><td colspan="7"><div class="skill-empty"><strong>Brak skilli</strong><span>Zmień filtr albo dodaj pierwszy skill.</span></div></td></tr>';
+      </tr>`).join('') : '<tr class="skill-filter-empty"><td colspan="7"><div><strong>Brak wyników</strong><span>Zmień filtry w nagłówkach albo wyszukiwanie.</span></div></td></tr>';
 
     rows.querySelectorAll('tr[data-skill-id]').forEach((row) => {
       row.addEventListener('click', (event) => {
@@ -114,6 +191,110 @@
         openEdit(row.dataset.skillId);
       });
       row.querySelector('.open-skill')?.addEventListener('click', () => openEdit(row.dataset.skillId));
+    });
+    updateHeaderState();
+  }
+
+  function toggleSort(column) {
+    state.sort = state.sort.column === column
+      ? { column, direction: state.sort.direction === 'asc' ? 'desc' : 'asc' }
+      : { column, direction: 'asc' };
+    render();
+  }
+
+  function closeFilterPopover() {
+    popover.hidden = true;
+    popover.innerHTML = '';
+    state.filterPopoverColumn = null;
+  }
+
+  function positionFilterPopover(anchor) {
+    const rect = anchor.getBoundingClientRect();
+    const width = Math.min(360, window.innerWidth - 24);
+    popover.style.width = `${width}px`;
+    popover.hidden = false;
+    const left = Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12));
+    popover.style.left = `${left}px`;
+    const popoverHeight = Math.min(popover.scrollHeight, Math.max(280, window.innerHeight - 24));
+    const below = rect.bottom + 8;
+    const top = below + popoverHeight <= window.innerHeight - 12
+      ? below
+      : Math.max(12, rect.top - popoverHeight - 8);
+    popover.style.top = `${top}px`;
+  }
+
+  function openFilterPopover(column, anchor) {
+    state.filterPopoverColumn = column;
+    const values = uniqueValues(column);
+    const active = state.filters[column];
+    const initial = active === null ? new Set(values) : new Set(active);
+
+    popover.innerHTML = `<div class="filter-popover-head">
+        <div><span>Filtr kolumny</span><strong>${esc(columnLabels[column])}</strong></div>
+        <button class="filter-close" type="button" aria-label="Zamknij">×</button>
+      </div>
+      <div class="filter-sort-row">
+        <button type="button" data-sort="asc"><span>↑</span> Rosnąco</button>
+        <button type="button" data-sort="desc"><span>↓</span> Malejąco</button>
+      </div>
+      <label class="filter-search"><span>⌕</span><input type="search" placeholder="Szukaj na liście" autocomplete="off"></label>
+      <label class="filter-select-all"><input id="skillFilterSelectAll" type="checkbox"><span>Zaznacz wszystko</span><small>${values.length}</small></label>
+      <div class="filter-values">${values.map((value, index) => `<label class="filter-value" data-value-index="${index}"><input type="checkbox"${initial.has(value) ? ' checked' : ''}><span>${esc(displayFilterValue(column, value))}</span></label>`).join('')}</div>
+      <div class="filter-popover-footer">
+        <button class="filter-clear" data-action="clear" type="button">Wyczyść filtr</button>
+        <button class="filter-apply" data-action="apply" type="button">Zastosuj <span>→</span></button>
+      </div>`;
+
+    positionFilterPopover(anchor);
+
+    const valueRows = [...popover.querySelectorAll('.filter-value')];
+    const selectAllBox = popover.querySelector('#skillFilterSelectAll');
+    const syncSelectAll = () => {
+      const visible = valueRows.filter((row) => !row.hidden);
+      const checked = visible.filter((row) => row.querySelector('input').checked).length;
+      selectAllBox.checked = visible.length > 0 && checked === visible.length;
+      selectAllBox.indeterminate = checked > 0 && checked < visible.length;
+    };
+    syncSelectAll();
+
+    popover.querySelector('.filter-close').addEventListener('click', closeFilterPopover);
+    popover.querySelector('[data-sort="asc"]').addEventListener('click', () => {
+      state.sort = { column, direction: 'asc' };
+      render();
+      closeFilterPopover();
+    });
+    popover.querySelector('[data-sort="desc"]').addEventListener('click', () => {
+      state.sort = { column, direction: 'desc' };
+      render();
+      closeFilterPopover();
+    });
+    popover.querySelector('.filter-search input').addEventListener('input', (event) => {
+      const query = event.target.value.trim().toLowerCase();
+      valueRows.forEach((row) => {
+        const value = values[Number(row.dataset.valueIndex)] || '';
+        row.hidden = !!query && !displayFilterValue(column, value).toLowerCase().includes(query);
+      });
+      syncSelectAll();
+    });
+    selectAllBox.addEventListener('change', () => {
+      valueRows.filter((row) => !row.hidden).forEach((row) => {
+        row.querySelector('input').checked = selectAllBox.checked;
+      });
+      syncSelectAll();
+    });
+    valueRows.forEach((row) => row.querySelector('input').addEventListener('change', syncSelectAll));
+    popover.querySelector('[data-action="clear"]').addEventListener('click', () => {
+      state.filters[column] = null;
+      render();
+      closeFilterPopover();
+    });
+    popover.querySelector('[data-action="apply"]').addEventListener('click', () => {
+      const selected = new Set(valueRows
+        .filter((row) => row.querySelector('input').checked)
+        .map((row) => values[Number(row.dataset.valueIndex)]));
+      state.filters[column] = selected.size === values.length ? null : selected;
+      render();
+      closeFilterPopover();
     });
   }
 
@@ -161,6 +342,7 @@
     document.getElementById('skillSortOrder').value = String(skill.sortOrder || 0);
     deleteBtn.hidden = !isAdmin;
     message.textContent = '';
+    message.classList.remove('success');
     setDrawer(true);
   }
 
@@ -195,8 +377,10 @@
       return;
     }
     const submit = document.getElementById('saveSkillBtn');
+    const wasCreate = state.mode === 'create';
     submit.disabled = true;
     message.textContent = '';
+    message.classList.remove('success');
     const body = new URLSearchParams({
       skillId: document.getElementById('skillId').value,
       name: document.getElementById('skillName').value.trim(),
@@ -210,16 +394,15 @@
       requestedBy: user.userId
     });
     try {
-      const response = await fetch(state.mode === 'create' ? CREATE_URL : UPDATE_URL, { method: 'POST', body, cache: 'no-store', credentials: 'omit' });
+      const response = await fetch(wasCreate ? CREATE_URL : UPDATE_URL, { method: 'POST', body, cache: 'no-store', credentials: 'omit' });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) throw new Error(data.message || 'Nie udało się zapisać skilla.');
-      await load();
       const id = data.skill?.skillId || document.getElementById('skillId').value;
+      await load();
       if (id) openEdit(id); else closeDrawer();
-      message.textContent = state.mode === 'create' ? 'Skill utworzony.' : 'Skill zapisany.';
+      message.textContent = wasCreate ? 'Skill utworzony.' : 'Skill zapisany.';
       message.classList.add('success');
     } catch (error) {
-      message.classList.remove('success');
       message.textContent = error.message || 'Nie udało się zapisać skilla.';
     } finally {
       submit.disabled = false;
@@ -228,7 +411,7 @@
 
   function openDeleteModal() {
     if (!isAdmin || !state.selected) return;
-    document.getElementById('deleteSkillText').textContent = `Skill „${state.selected.name}” zostanie trwale usunięty z katalogu.`;
+    document.getElementById('deleteSkillText').textContent = `Skill „${state.selected.name}” zostanie trwale usunięty z katalogu i z przypisań pracowników.`;
     deleteMessage.textContent = '';
     deleteBackdrop.hidden = false;
     deleteModal.classList.add('open');
@@ -261,6 +444,28 @@
     }
   }
 
+  document.querySelector('.skill-table thead').addEventListener('click', (event) => {
+    const sortButton = event.target.closest('.column-sort-button');
+    if (sortButton) {
+      event.stopPropagation();
+      toggleSort(sortButton.dataset.column);
+      return;
+    }
+    const filterButton = event.target.closest('.column-filter-button');
+    if (filterButton) {
+      event.stopPropagation();
+      const column = filterButton.dataset.column;
+      if (!popover.hidden && state.filterPopoverColumn === column) closeFilterPopover();
+      else openFilterPopover(column, filterButton);
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!popover.hidden && !popover.contains(event.target) && !event.target.closest('.column-filter-button')) closeFilterPopover();
+  });
+  window.addEventListener('resize', closeFilterPopover);
+  window.addEventListener('scroll', closeFilterPopover, true);
+
   search.addEventListener('input', render);
   document.querySelectorAll('[data-status]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -279,7 +484,8 @@
   deleteBackdrop.addEventListener('click', closeDeleteModal);
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    if (deleteModal.classList.contains('open')) closeDeleteModal();
+    if (!popover.hidden) closeFilterPopover();
+    else if (deleteModal.classList.contains('open')) closeDeleteModal();
     else if (drawer.classList.contains('open')) closeDrawer();
   });
 
