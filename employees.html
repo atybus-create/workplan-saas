@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Workplan — pracownicy</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="app-page">
+  <header class="topbar">
+    <div class="brand-inline"><span class="brand-mark small">W</span><strong>Workplan</strong></div>
+    <div class="user-box"><span id="userName">Administrator</span><button id="logoutBtn" class="ghost">Wyloguj</button></div>
+  </header>
+  <main class="content-shell">
+    <div class="page-head">
+      <div>
+        <p class="eyebrow">Zespół</p>
+        <h1>Pracownicy</h1>
+      </div>
+    </div>
+    <section class="empty-state">
+      <div class="empty-icon">+</div>
+      <h2>Lista pracowników będzie tutaj</h2>
+      <p>Ten ekran jest gotowy jako punkt startowy. W kolejnym kroku określimy zakres danych pracownika i sposób dodawania osób.</p>
+    </section>
+  </main>
+  <script>
+    const raw = sessionStorage.getItem('workplan_user');
+    if (!raw) location.replace('index.html');
+    const user = raw ? JSON.parse(raw) : null;
+    if (user?.displayName) document.getElementById('userName').textContent = user.displayName;
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('workplan_user');
+      location.replace('index.html');
+    });
+  </script>
+</body>
+</html>
