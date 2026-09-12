@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>Workplan — Pracownicy</title>
-  <link rel="stylesheet" href="styles.css?v=20260912.2">
+  <link rel="stylesheet" href="styles.css?v=20260912.3">
 </head>
 <body class="app-page" data-page="employees">
   <div class="app-shell">
@@ -36,19 +36,38 @@
         <article><span>Bez przypisanych skilli</span><strong id="noSkillsCount">—</strong></article>
       </section>
 
+      <section id="bulkBar" class="bulk-bar" hidden>
+        <div><strong><span id="selectedCount">0</span> zaznaczonych</strong><span>Zmiany wykonasz jednocześnie dla całej grupy.</span></div>
+        <div class="bulk-actions">
+          <button id="bulkProcessBtn" class="primary-button compact" type="button"><span>Przydziel / zmień proces</span><span>→</span></button>
+          <button id="bulkAvailabilityBtn" class="secondary-button" type="button">Zmień dostępność</button>
+          <button id="clearSelectionBtn" class="ghost-button" type="button">Wyczyść</button>
+        </div>
+      </section>
+
       <section class="panel employee-list-panel">
         <div class="employee-list-head">
-          <div><p class="eyebrow">Lista zespołu</p><h2>Pracownicy w bazie</h2><p>Wybierz pracownika, aby sprawdzić szczegóły i ustawić dostępność.</p></div>
-          <div class="employee-tools"><label class="employee-search"><span>⌕</span><input id="employeeSearch" type="search" placeholder="Szukaj po loginie lub nazwie" autocomplete="off"></label></div>
+          <div><p class="eyebrow">Lista zespołu</p><h2>Pracownicy w bazie</h2><p>Zaznacz osoby do operacji grupowej albo kliknij w pracownika, aby otworzyć jego profil.</p></div>
+          <div class="employee-tools">
+            <label class="employee-search"><span>⌕</span><input id="employeeSearch" type="search" placeholder="Szukaj po loginie lub nazwie" autocomplete="off"></label>
+            <select id="skillFilter" class="control-select" aria-label="Filtruj po skillu"><option value="">Wszystkie skille</option></select>
+            <select id="employeeSort" class="control-select" aria-label="Sortuj pracowników">
+              <option value="name">Nazwa A–Z</option>
+              <option value="skills">Skille A–Z</option>
+              <option value="skillCount">Liczba skilli ↓</option>
+              <option value="hireDate">Data zatrudnienia</option>
+              <option value="availability">Dostępność</option>
+            </select>
+          </div>
         </div>
 
         <div id="employeeLoading" class="employee-state">Pobieranie pracowników…</div>
         <div id="employeeError" class="employee-state error" hidden></div>
-        <div id="employeeEmpty" class="employee-state" hidden>Brak pracowników w bazie.</div>
+        <div id="employeeEmpty" class="employee-state" hidden>Brak pracowników spełniających filtry.</div>
 
         <div id="employeeTableWrap" class="employee-table-wrap" hidden>
           <table class="employee-table">
-            <thead><tr><th>Pracownik</th><th>Login</th><th>Dostępność</th><th>Skille</th><th>Data zatrudnienia</th><th></th></tr></thead>
+            <thead><tr><th class="check-col"><input id="selectAllEmployees" type="checkbox" aria-label="Zaznacz wszystkich widocznych"></th><th>Pracownik</th><th>Login</th><th>Dostępność</th><th>Skille</th><th>Proces</th><th>Data zatrudnienia</th><th>Akcja</th></tr></thead>
             <tbody id="employeeRows"></tbody>
           </table>
         </div>
@@ -62,13 +81,15 @@
       <div><p class="eyebrow">Profil pracownika</p><h2 id="employeeDrawerTitle">Pracownik</h2><span id="employeeDrawerLogin" class="drawer-login"></span></div>
       <button id="employeeDrawerClose" class="drawer-close" type="button" aria-label="Zamknij">×</button>
     </div>
-
     <div class="drawer-content">
       <section class="drawer-section">
         <div class="drawer-section-head"><h3>Dane podstawowe</h3></div>
         <dl class="employee-details"><div><dt>Login</dt><dd id="detailLogin">—</dd></div><div><dt>Rola</dt><dd id="detailRole">—</dd></div><div><dt>Data zatrudnienia</dt><dd id="detailHireDate">Brak danych</dd></div><div><dt>Konto</dt><dd id="detailAccount">—</dd></div></dl>
       </section>
-
+      <section class="drawer-section">
+        <div class="drawer-section-head"><div><h3>Aktualny proces</h3><p>Proces obowiązujący dzisiaj.</p></div><button id="drawerProcessBtn" class="secondary-button" type="button">Przydziel proces</button></div>
+        <div id="detailProcess" class="process-detail">Brak przydzielonego procesu</div>
+      </section>
       <section class="drawer-section">
         <div class="drawer-section-head"><div><h3>Dostępność</h3><p>Reguła obowiązuje w wybranym zakresie dat.</p></div><span id="detailAvailability" class="status-chip">—</span></div>
         <form id="availabilityForm" class="availability-form">
@@ -79,19 +100,27 @@
           <p id="availabilityMessage" class="form-message" role="status" aria-live="polite"></p>
         </form>
       </section>
-
       <section class="drawer-section">
-        <div class="drawer-section-head"><div><h3>Skille</h3><p>Umiejętności wynikają z osobnej konfiguracji skilli.</p></div></div>
+        <div class="drawer-section-head"><div><h3>Skille</h3><p>Wszystkie umiejętności, w których pracownik został przeszkolony.</p></div></div>
         <div id="detailSkills" class="skills-list"></div>
       </section>
-
-      <section class="drawer-section message-section">
-        <div><h3>Wiadomość do pracownika</h3><p>Obsługę wiadomości podepniemy w kolejnym etapie.</p></div>
-        <button class="secondary-button message-button" type="button" disabled>Wyślij wiadomość</button>
-      </section>
+      <section class="drawer-section message-section"><div><h3>Wiadomość do pracownika</h3><p>Obsługę wiadomości podepniemy później.</p></div><button class="secondary-button message-button" type="button" disabled>Wyślij wiadomość</button></section>
     </div>
   </aside>
 
-  <script src="app.js?v=20260912.2"></script>
+  <div id="actionModalBackdrop" class="modal-backdrop" hidden></div>
+  <section id="actionModal" class="action-modal" aria-hidden="true" aria-labelledby="actionModalTitle">
+    <div class="modal-head"><div><p class="eyebrow">Operacja grupowa</p><h2 id="actionModalTitle">Zmień dane pracowników</h2><p id="actionModalSubtitle"></p></div><button id="actionModalClose" class="drawer-close" type="button" aria-label="Zamknij">×</button></div>
+    <form id="bulkActionForm" class="bulk-form">
+      <div id="processFields"><label class="field"><span>Proces</span><select id="bulkProcessSelect" class="control-select" required></select></label></div>
+      <div id="availabilityFields" hidden><div class="availability-choice"><label><input type="radio" name="bulkAvailabilityState" value="true" checked><span>Dostępny</span></label><label><input type="radio" name="bulkAvailabilityState" value="false"><span>Niedostępny</span></label></div></div>
+      <div class="date-grid"><label class="field"><span>Od</span><input id="bulkDateFrom" type="date" required></label><label class="field"><span>Do</span><input id="bulkDateTo" type="date" required></label></div>
+      <label class="field"><span>Notatka <small>opcjonalnie</small></span><input id="bulkNote" type="text" maxlength="500" placeholder="Powód lub komentarz do zmiany"></label>
+      <p id="bulkActionMessage" class="form-message" role="status" aria-live="polite"></p>
+      <div class="modal-actions"><button id="bulkActionCancel" class="secondary-button" type="button">Anuluj</button><button id="bulkActionSave" class="primary-button compact" type="submit"><span>Zapisz dla zaznaczonych</span><span>→</span></button></div>
+    </form>
+  </section>
+
+  <script src="app.js?v=20260912.3"></script>
 </body>
 </html>
