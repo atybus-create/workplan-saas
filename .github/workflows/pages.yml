@@ -23,15 +23,19 @@ jobs:
         run: |
           from pathlib import Path
           skill_link = '<a class="nav-item" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>'
+          process_link = '<a class="nav-item" href="process-hub.html"><span class="nav-icon">▧</span><span>Proces Hub</span></a>'
           time_link = '<a class="nav-item" href="time-plan.html"><span class="nav-icon">◷</span><span>Plan pracy</span></a>'
-          for name in ('start.html', 'employees.html'):
+          marker = '<button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>'
+          for name in ('start.html', 'employees.html', 'skills.html', 'process-hub.html', 'time-plan.html'):
               p = Path(name)
+              if not p.exists():
+                  continue
               text = p.read_text(encoding='utf-8')
               if 'href="skills.html"' not in text:
-                  marker = '<button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>'
                   text = text.replace(marker, skill_link + '\n        ' + marker, 1)
+              if 'href="process-hub.html"' not in text:
+                  text = text.replace(marker, process_link + '\n        ' + marker, 1)
               if 'href="time-plan.html"' not in text:
-                  marker = '<button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>'
                   text = text.replace(marker, time_link + '\n        ' + marker, 1)
               p.write_text(text, encoding='utf-8')
       - uses: actions/configure-pages@v5
