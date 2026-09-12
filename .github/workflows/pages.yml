@@ -34,7 +34,14 @@ jobs:
               if 'href="skills.html"' not in text:
                   text = text.replace(marker, skill_link + '\n        ' + marker, 1)
               if 'href="process-hub.html"' not in text:
-                  text = text.replace(marker, process_link + '\n        ' + marker, 1)
+                  lines = text.splitlines()
+                  time_index = next((i for i, line in enumerate(lines) if 'href="time-plan.html"' in line), None)
+                  if time_index is not None:
+                      indent = lines[time_index][:len(lines[time_index]) - len(lines[time_index].lstrip())]
+                      lines.insert(time_index, indent + process_link)
+                      text = '\n'.join(lines) + ('\n' if text.endswith('\n') else '')
+                  else:
+                      text = text.replace(marker, process_link + '\n        ' + marker, 1)
               if 'href="time-plan.html"' not in text:
                   text = text.replace(marker, time_link + '\n        ' + marker, 1)
               p.write_text(text, encoding='utf-8')
