@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark">
   <title>Workplan — Plan pracy</title>
   <link rel="stylesheet" href="styles.css?v=20260912.3">
-  <link rel="stylesheet" href="time-plan.css?v=20260912.1">
+  <link rel="stylesheet" href="time-plan.css?v=20260912.2">
 </head>
 <body class="app-page" data-page="time-plan">
   <div class="app-shell">
@@ -16,8 +16,8 @@
         <a class="nav-item" href="start.html"><span class="nav-icon">⌂</span><span>Start</span></a>
         <a class="nav-item" href="employees.html"><span class="nav-icon">◎</span><span>Pracownicy</span></a>
         <a class="nav-item" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>
+        <a class="nav-item" href="process-hub.html"><span class="nav-icon">▧</span><span>Proces Hub</span></a>
         <a class="nav-item active" href="time-plan.html"><span class="nav-icon">◷</span><span>Plan pracy</span></a>
-        <button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>
         <button class="nav-item" type="button" disabled><span class="nav-icon">▦</span><span>Planowanie</span></button>
         <button class="nav-item" type="button" disabled><span class="nav-icon">↗</span><span>Raporty</span></button>
       </nav>
@@ -27,7 +27,7 @@
     <main class="dashboard time-dashboard">
       <header class="topbar time-topbar">
         <button id="menuToggle" class="menu-toggle" type="button" aria-label="Otwórz menu">☰</button>
-        <div class="time-title"><p class="eyebrow">Obsada i godziny</p><h1>Czas pracy i zapotrzebowanie</h1><p>Konfiguruj zmiany, potrzeby procesów i plan pracy każdego pracownika.</p></div>
+        <div class="time-title"><p class="eyebrow">Obsada i godziny</p><h1>Czas pracy i zapotrzebowanie</h1><p>Najpierw ustaw zapotrzebowanie procesu, potem dobierz ludzi do konkretnych zmian.</p></div>
         <div class="user-menu"><div class="avatar" id="userAvatar">U</div><div class="user-meta"><strong id="userDisplay">Użytkownik</strong><span>Workplan</span></div><button id="logoutBtn" class="secondary-button" type="button">Wyloguj</button></div>
       </header>
 
@@ -39,8 +39,8 @@
       <section class="time-summary" aria-label="Podsumowanie planu">
         <article><span>Aktywne zmiany</span><strong id="summaryShifts">—</strong><small>maks. 6 dziennie</small></article>
         <article><span>Zapotrzebowanie</span><strong id="summaryRequired">—</strong><small>godzin pracy</small></article>
-        <article><span>Zaplanowano</span><strong id="summaryAssigned">—</strong><small>godzin pracy</small></article>
-        <article><span>Pracownicy w planie</span><strong id="summaryEmployees">—</strong><small>unikalne osoby</small></article>
+        <article><span>Przypisano</span><strong id="summaryAssigned">—</strong><small>godzin pracy</small></article>
+        <article><span>Osoby w planie</span><strong id="summaryEmployees">—</strong><small>unikalne osoby</small></article>
       </section>
 
       <section class="panel shift-panel">
@@ -49,18 +49,8 @@
       </section>
 
       <section class="panel demand-panel">
-        <div class="section-head"><div><p class="eyebrow">Zapotrzebowanie</p><h2>Ile pracy potrzebuje każdy proces</h2><p>Podajesz godziny i standard dnia pracy jednej osoby. System przelicza liczbę osób i dzieli godziny między zmiany.</p></div></div>
+        <div class="section-head"><div><p class="eyebrow">Procesy</p><h2>Zapotrzebowanie i obsada</h2><p>Wpisz godziny potrzebne w procesie. Pokrycie aktualizuje się po każdym przypisaniu pracowników.</p></div></div>
         <div id="demandGrid" class="demand-grid"></div>
-      </section>
-
-      <section class="panel planner-panel">
-        <div class="section-head planner-heading"><div><p class="eyebrow">Plan pracowników</p><h2>Przydziały na dzień</h2><p>Każdy zapis tworzy kolejną wersję historyczną planu.</p></div><label class="planner-search"><span>⌕</span><input id="employeeSearch" type="search" placeholder="Szukaj pracownika"></label></div>
-        <div class="planner-table-wrap">
-          <table class="planner-table">
-            <thead><tr><th>Pracownik</th><th>Proces</th><th>Zmiana</th><th>Od</th><th>Do</th><th>Godziny</th><th>Status</th><th></th></tr></thead>
-            <tbody id="plannerRows"></tbody>
-          </table>
-        </div>
       </section>
 
       <p id="pageMessage" class="page-message" role="status" aria-live="polite"></p>
@@ -69,7 +59,7 @@
 
   <div id="shiftBackdrop" class="time-backdrop" hidden></div>
   <aside id="shiftDrawer" class="time-drawer" aria-hidden="true">
-    <div class="time-drawer-head"><div><p class="eyebrow">Konfiguracja dnia</p><h2>Zmiany robocze</h2><span>Maksymalnie 6 zmian. Nieaktywne pozostają w historii.</span></div><button id="shiftDrawerClose" class="drawer-close" type="button">×</button></div>
+    <div class="time-drawer-head"><div><p class="eyebrow">Konfiguracja dnia</p><h2>Zmiany robocze</h2><span>Maksymalnie 6 zmian. Ustawienia są zapisywane historycznie.</span></div><button id="shiftDrawerClose" class="drawer-close" type="button">×</button></div>
     <form id="shiftForm" class="shift-form">
       <label class="field shift-count"><span>Liczba aktywnych zmian</span><select id="shiftCount" class="control-select"><option value="1">1 zmiana</option><option value="2">2 zmiany</option><option value="3">3 zmiany</option><option value="4">4 zmiany</option><option value="5">5 zmian</option><option value="6">6 zmian</option></select></label>
       <div id="shiftEditorRows" class="shift-editor-rows"></div>
@@ -78,6 +68,32 @@
     </form>
   </aside>
 
-  <script src="time-plan.js?v=20260912.1"></script>
+  <div id="assignBackdrop" class="time-backdrop" hidden></div>
+  <aside id="assignDrawer" class="assign-drawer" aria-hidden="true">
+    <div class="assign-drawer-head">
+      <div><p class="eyebrow">Przypisanie obsady</p><h2 id="assignProcessName">Proces</h2><div class="assign-process-meta"><span id="assignSkillBadge">Skill nieustawiony</span><span id="assignCoverageBadge">0 / 0 h</span></div></div>
+      <button id="assignDrawerClose" class="drawer-close" type="button" aria-label="Zamknij">×</button>
+    </div>
+    <div class="assign-body">
+      <section class="assign-step">
+        <div class="assign-step-head"><span class="step-no">1</span><div><strong>Wybierz zmianę</strong><small>Godziny są pobierane z konfiguracji dnia.</small></div></div>
+        <div id="assignShiftTabs" class="assign-shift-tabs"></div>
+      </section>
+
+      <section class="assign-step people-step">
+        <div class="assign-step-head"><span class="step-no">2</span><div><strong>Wybierz dostępne osoby</strong><small>Najpierw pokazujemy pracowników z wymaganym skillem.</small></div></div>
+        <label class="assign-search"><span>⌕</span><input id="assignEmployeeSearch" type="search" placeholder="Szukaj pracownika" autocomplete="off"></label>
+        <div id="assignPeople"></div>
+      </section>
+
+      <div class="assign-sticky-footer">
+        <div><strong id="assignSelectedCount">0 osób</strong><span id="assignSelectedHours">0 h do przypisania</span></div>
+        <button id="assignSelectedBtn" class="primary-button" type="button">Przypisz do zmiany</button>
+      </div>
+      <p id="assignMessage" class="form-message" role="status" aria-live="polite"></p>
+    </div>
+  </aside>
+
+  <script src="time-plan.js?v=20260912.2"></script>
 </body>
 </html>
