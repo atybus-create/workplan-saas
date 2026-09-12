@@ -8,8 +8,9 @@
   <link rel="stylesheet" href="styles.css?v=20260912.3">
   <link rel="stylesheet" href="employees-extra.css?v=20260912.2">
   <link rel="stylesheet" href="employees-grid-v3.css?v=20260912.1">
+  <link rel="stylesheet" href="employees-admin-v4.css?v=20260912.1">
 </head>
-<body class="app-page" data-page="employees-v3">
+<body class="app-page" data-page="employees-v4">
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand-lockup sidebar-brand"><span class="brand-mark">W</span><span>Workplan</span></div>
@@ -27,8 +28,13 @@
     <main class="dashboard employee-dashboard">
       <header class="topbar employee-topbar">
         <button id="menuToggle" class="menu-toggle" type="button" aria-label="Otwórz menu">☰</button>
-        <div><p class="eyebrow">Zespół</p><h1>Pracownicy</h1></div>
-        <div class="user-menu"><div class="avatar" id="userAvatar">U</div><div class="user-meta"><strong id="userDisplay">Użytkownik</strong><span>Workplan</span></div><button id="logoutBtn" class="secondary-button" type="button">Wyloguj</button></div>
+        <div class="employee-topbar-main">
+          <div class="employee-title-actions">
+            <div><p class="eyebrow">Zespół</p><h1>Pracownicy</h1></div>
+            <button id="addEmployeeBtn" class="primary-button compact add-employee-button" type="button"><span>＋ Dodaj pracownika</span></button>
+          </div>
+          <div class="user-menu"><div class="avatar" id="userAvatar">U</div><div class="user-meta"><strong id="userDisplay">Użytkownik</strong><span>Workplan</span></div><button id="logoutBtn" class="secondary-button" type="button">Wyloguj</button></div>
+        </div>
       </header>
 
       <section class="employee-summary" aria-label="Podsumowanie pracowników">
@@ -45,8 +51,8 @@
 
       <section class="panel employee-list-panel">
         <div class="employee-list-head">
-          <div><p class="eyebrow">Lista zespołu</p><h2>Pracownicy w bazie</h2><p>Kliknij nazwę kolumny, żeby sortować. Ikona filtra otwiera wybór wartości z multiwyborem.</p></div>
-          <label class="employee-search"><span>⌕</span><input id="employeeSearch" type="search" placeholder="Szukaj po loginie lub nazwie" autocomplete="off"></label>
+          <div><p class="eyebrow">Lista zespołu</p><h2>Pracownicy w bazie</h2><p>Pracownicy i liderzy są planowani. Konta administratorów nie są pokazywane na tej liście.</p></div>
+          <label class="employee-search"><span>⌕</span><input id="employeeSearch" type="search" placeholder="Szukaj po nazwie, loginie lub e-mailu" autocomplete="off"></label>
         </div>
         <div id="employeeLoading" class="employee-state">Pobieranie pracowników…</div>
         <div id="employeeError" class="employee-state error" hidden></div>
@@ -56,6 +62,7 @@
               <th class="check-col"><input id="selectAllEmployees" type="checkbox" aria-label="Zaznacz wszystkich widocznych"></th>
               <th class="filterable-th" data-column="name"><div class="th-shell"><button class="column-sort-button" type="button" data-column="name">Pracownik <span class="sort-indicator">↑</span></button><button class="column-filter-button" type="button" data-column="name" aria-label="Filtruj pracowników"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
               <th class="filterable-th" data-column="login"><div class="th-shell"><button class="column-sort-button" type="button" data-column="login">Login <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="login" aria-label="Filtruj loginy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="role"><div class="th-shell"><button class="column-sort-button" type="button" data-column="role">Rola <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="role" aria-label="Filtruj role"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
               <th class="filterable-th" data-column="availability"><div class="th-shell"><button class="column-sort-button" type="button" data-column="availability">Dostępność <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="availability" aria-label="Filtruj dostępność"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
               <th class="filterable-th" data-column="skills"><div class="th-shell"><button class="column-sort-button" type="button" data-column="skills">Skille <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="skills" aria-label="Filtruj skille"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
               <th class="filterable-th" data-column="process"><div class="th-shell"><button class="column-sort-button" type="button" data-column="process">Proces <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="process" aria-label="Filtruj proces"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
@@ -75,17 +82,51 @@
   <aside id="employeeDrawer" class="employee-drawer" aria-hidden="true" aria-labelledby="employeeDrawerTitle">
     <div class="drawer-head"><div><p class="eyebrow">Profil pracownika</p><h2 id="employeeDrawerTitle">Pracownik</h2><span id="employeeDrawerLogin" class="drawer-login"></span></div><button id="employeeDrawerClose" class="drawer-close" type="button" aria-label="Zamknij">×</button></div>
     <div class="drawer-content">
-      <section class="drawer-section"><div class="drawer-section-head"><h3>Dane podstawowe</h3></div><dl class="employee-details"><div><dt>Login</dt><dd id="detailLogin">—</dd></div><div><dt>Rola</dt><dd id="detailRole">—</dd></div><div><dt>Data zatrudnienia</dt><dd id="detailHireDate">Brak danych</dd></div><div><dt>Konto</dt><dd id="detailAccount">—</dd></div></dl></section>
+      <section class="drawer-section"><div class="drawer-section-head"><h3>Dane podstawowe</h3></div><dl class="employee-details"><div><dt>Login</dt><dd id="detailLogin">—</dd></div><div><dt>Rola</dt><dd id="detailRole">—</dd></div><div class="detail-wide"><dt>E-mail</dt><dd id="detailEmail">Brak danych</dd></div><div><dt>Data zatrudnienia</dt><dd id="detailHireDate">Brak danych</dd></div><div><dt>Konto</dt><dd id="detailAccount">—</dd></div></dl></section>
       <section class="drawer-section"><div class="drawer-section-head"><div><h3>Aktualny proces</h3><p>Proces obowiązujący dzisiaj.</p></div><button id="drawerProcessBtn" class="secondary-button" type="button">Przydziel proces</button></div><div id="detailProcess" class="process-detail">Brak przydzielonego procesu</div></section>
       <section class="drawer-section"><div class="drawer-section-head"><div><h3>Dostępność</h3><p>Reguła obowiązuje w wybranym zakresie dat.</p></div><span id="detailAvailability" class="status-chip">—</span></div><form id="availabilityForm" class="availability-form"><div class="date-grid"><label class="field"><span>Od</span><input id="availabilityFrom" type="date" required></label><label class="field"><span>Do</span><input id="availabilityTo" type="date" required></label></div><div class="availability-choice" role="group" aria-label="Dostępność"><label><input type="radio" name="availabilityState" value="true" checked><span>Dostępny</span></label><label><input type="radio" name="availabilityState" value="false"><span>Niedostępny</span></label></div><label class="field"><span>Notatka <small>opcjonalnie</small></span><input id="availabilityNote" type="text" maxlength="500" placeholder="np. urlop, szkolenie, zmiana dostępności"></label><button id="availabilitySave" class="primary-button compact" type="submit"><span>Zapisz dostępność</span><span>→</span></button><p id="availabilityMessage" class="form-message" role="status" aria-live="polite"></p></form></section>
       <section class="drawer-section"><div class="drawer-section-head"><div><h3>Skille</h3><p>Dodawaj i usuwaj umiejętności bezpośrednio z profilu pracownika.</p></div></div><div id="detailSkills" class="skills-list editable-skills"></div><div class="skill-editor"><label class="field"><span>Dodaj skill</span><select id="skillAddSelect" class="control-select"></select></label><button id="skillAddBtn" class="secondary-button" type="button">Dodaj skill</button></div><p id="skillMessage" class="form-message" role="status" aria-live="polite"></p></section>
       <section class="drawer-section message-section"><div><h3>Wiadomość do pracownika</h3><p>Obsługę wiadomości podepniemy później.</p></div><button class="secondary-button message-button" type="button" disabled>Wyślij wiadomość</button></section>
+      <section class="drawer-section danger-zone"><div class="drawer-section-head"><div><h3>Usuń pracownika</h3><p>Operacja usuwa konto oraz wszystkie dane planistyczne tego pracownika.</p></div><button id="deleteEmployeeBtn" class="danger-button" type="button">Usuń pracownika</button></div><p class="admin-only-note">Usunięcie wymaga uprawnień administratora i ponownego podania jego hasła.</p></section>
     </div>
   </aside>
 
   <div id="actionModalBackdrop" class="modal-backdrop" hidden></div>
   <section id="actionModal" class="action-modal" aria-hidden="true" aria-labelledby="actionModalTitle"><div class="modal-head"><div><p class="eyebrow">Operacja grupowa</p><h2 id="actionModalTitle">Zmień dane pracowników</h2><p id="actionModalSubtitle"></p></div><button id="actionModalClose" class="drawer-close" type="button" aria-label="Zamknij">×</button></div><form id="bulkActionForm" class="bulk-form"><div id="processFields"><label class="field"><span>Proces</span><select id="bulkProcessSelect" class="control-select" required></select></label></div><div id="availabilityFields" hidden><div class="availability-choice"><label><input type="radio" name="bulkAvailabilityState" value="true" checked><span>Dostępny</span></label><label><input type="radio" name="bulkAvailabilityState" value="false"><span>Niedostępny</span></label></div></div><div class="date-grid"><label class="field"><span>Od</span><input id="bulkDateFrom" type="date" required></label><label class="field"><span>Do</span><input id="bulkDateTo" type="date" required></label></div><label class="field"><span>Notatka <small>opcjonalnie</small></span><input id="bulkNote" type="text" maxlength="500" placeholder="Powód lub komentarz do zmiany"></label><p id="bulkActionMessage" class="form-message" role="status" aria-live="polite"></p><div class="modal-actions"><button id="bulkActionCancel" class="secondary-button" type="button">Anuluj</button><button id="bulkActionSave" class="primary-button compact" type="submit"><span>Zapisz dla zaznaczonych</span><span>→</span></button></div></form></section>
 
-  <script src="employees-v3.js?v=20260912.1"></script>
+  <div id="createEmployeeBackdrop" class="modal-backdrop" hidden></div>
+  <section id="createEmployeeModal" class="action-modal" aria-hidden="true" aria-labelledby="createEmployeeTitle">
+    <div class="modal-head"><div><p class="eyebrow">Nowe konto</p><h2 id="createEmployeeTitle">Dodaj pracownika</h2><p>Utwórz profil, konto logowania i dane do późniejszej aplikacji mobilnej.</p></div><button id="createEmployeeClose" class="drawer-close" type="button" aria-label="Zamknij">×</button></div>
+    <form id="createEmployeeForm" class="bulk-form">
+      <div class="employee-create-intro"><strong>Pracownik i Lider</strong> pojawią się na liście i będą podlegać planowaniu. Konto Administrator nie jest tworzone z tego formularza.</div>
+      <div class="admin-form-grid">
+        <label class="field full"><span>Imię i nazwisko</span><input id="createDisplayName" type="text" maxlength="120" autocomplete="name" required placeholder="np. Anna Kowalska"></label>
+        <label class="field"><span>Login</span><input id="createLogin" type="text" minlength="3" maxlength="80" autocomplete="username" required placeholder="np. anna.kowalska"></label>
+        <label class="field"><span>E-mail</span><input id="createEmail" type="email" maxlength="160" autocomplete="email" required placeholder="anna@firma.pl"></label>
+        <label class="field"><span>Data zatrudnienia</span><input id="createHireDate" type="date" required></label>
+        <div class="field"><span>Rola</span><div class="role-choice"><label><input type="radio" name="createRole" value="employee" checked><span>Pracownik<small>Osoba planowana i zarządzana.</small></span></label><label><input type="radio" name="createRole" value="leader"><span>Lider<small>Osoba planowana z wyróżnieniem funkcji.</small></span></label></div><select id="createRole" hidden><option value="employee">Pracownik</option><option value="leader">Lider</option></select></div>
+        <label class="field"><span>Hasło</span><input id="createPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required><small class="password-hint">Minimum 8 znaków. Hasło zapisujemy tylko jako hash z losową solą.</small></label>
+        <label class="field"><span>Powtórz hasło</span><input id="createPasswordConfirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
+      </div>
+      <p id="createEmployeeMessage" class="form-message" role="status" aria-live="polite"></p>
+      <div class="modal-actions"><button id="createEmployeeCancel" class="secondary-button" type="button">Anuluj</button><button id="createEmployeeSave" class="primary-button compact" type="submit"><span>Utwórz pracownika</span><span>→</span></button></div>
+    </form>
+  </section>
+
+  <div id="deleteEmployeeBackdrop" class="modal-backdrop" hidden></div>
+  <section id="deleteEmployeeModal" class="action-modal" aria-hidden="true" aria-labelledby="deleteEmployeeTitle">
+    <div class="modal-head"><div><p class="eyebrow">Operacja nieodwracalna</p><h2 id="deleteEmployeeTitle">Usuń pracownika</h2><p>Potwierdź usunięcie konta i danych pracownika.</p></div><button id="deleteEmployeeClose" class="drawer-close" type="button" aria-label="Zamknij">×</button></div>
+    <form id="deleteEmployeeForm" class="bulk-form">
+      <div class="delete-warning"><strong>Wszystkie dane pracownika zostaną usunięte.</strong><p>Dotyczy to konta <b id="deleteEmployeeName">pracownika</b>, profilu, dostępności, skilli, przypisań do procesów i danych kontaktowych. Tej operacji nie można cofnąć z poziomu aplikacji.</p></div>
+      <label class="field"><span>Hasło administratora</span><input id="deleteAdminPassword" type="password" autocomplete="current-password" required placeholder="Wpisz swoje hasło"></label>
+      <p id="deleteEmployeeMessage" class="form-message" role="status" aria-live="polite"></p>
+      <div class="delete-confirm-actions"><button id="deleteEmployeeCancel" class="secondary-button" type="button">Anuluj</button><button id="deleteEmployeeSave" class="danger-submit" type="submit">Usuń bezpowrotnie</button></div>
+    </form>
+  </section>
+
+  <script src="employees-v4.js?v=20260912.1"></script>
+  <script>
+    document.querySelectorAll('input[name="createRole"]').forEach(function(r){r.addEventListener('change',function(){document.getElementById('createRole').value=this.value;});});
+  </script>
 </body>
 </html>
