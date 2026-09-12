@@ -7,8 +7,9 @@
   <title>Workplan — Pracownicy</title>
   <link rel="stylesheet" href="styles.css?v=20260912.3">
   <link rel="stylesheet" href="employees-extra.css?v=20260912.2">
+  <link rel="stylesheet" href="employees-grid-v3.css?v=20260912.1">
 </head>
-<body class="app-page" data-page="employees-v2">
+<body class="app-page" data-page="employees-v3">
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand-lockup sidebar-brand"><span class="brand-mark">W</span><span>Workplan</span></div>
@@ -44,22 +45,21 @@
 
       <section class="panel employee-list-panel">
         <div class="employee-list-head">
-          <div><p class="eyebrow">Lista zespołu</p><h2>Pracownicy w bazie</h2><p>Filtruj i sortuj bezpośrednio z nagłówków kolumn — jak w Excelu.</p></div>
+          <div><p class="eyebrow">Lista zespołu</p><h2>Pracownicy w bazie</h2><p>Kliknij nazwę kolumny, żeby sortować. Ikona filtra otwiera wybór wartości z multiwyborem.</p></div>
           <label class="employee-search"><span>⌕</span><input id="employeeSearch" type="search" placeholder="Szukaj po loginie lub nazwie" autocomplete="off"></label>
         </div>
         <div id="employeeLoading" class="employee-state">Pobieranie pracowników…</div>
         <div id="employeeError" class="employee-state error" hidden></div>
-        <div id="employeeEmpty" class="employee-state" hidden>Brak pracowników spełniających filtry.</div>
         <div id="employeeTableWrap" class="employee-table-wrap" hidden>
           <table class="employee-table">
             <thead><tr>
               <th class="check-col"><input id="selectAllEmployees" type="checkbox" aria-label="Zaznacz wszystkich widocznych"></th>
-              <th><button class="column-filter-button" type="button" data-column="name">Pracownik <span>⌄</span></button></th>
-              <th><button class="column-filter-button" type="button" data-column="login">Login <span>⌄</span></button></th>
-              <th><button class="column-filter-button" type="button" data-column="availability">Dostępność <span>⌄</span></button></th>
-              <th><button class="column-filter-button" type="button" data-column="skills">Skille <span>⌄</span></button></th>
-              <th><button class="column-filter-button" type="button" data-column="process">Proces <span>⌄</span></button></th>
-              <th><button class="column-filter-button" type="button" data-column="hireDate">Data zatrudnienia <span>⌄</span></button></th>
+              <th class="filterable-th" data-column="name"><div class="th-shell"><button class="column-sort-button" type="button" data-column="name">Pracownik <span class="sort-indicator">↑</span></button><button class="column-filter-button" type="button" data-column="name" aria-label="Filtruj pracowników"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="login"><div class="th-shell"><button class="column-sort-button" type="button" data-column="login">Login <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="login" aria-label="Filtruj loginy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="availability"><div class="th-shell"><button class="column-sort-button" type="button" data-column="availability">Dostępność <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="availability" aria-label="Filtruj dostępność"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="skills"><div class="th-shell"><button class="column-sort-button" type="button" data-column="skills">Skille <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="skills" aria-label="Filtruj skille"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="process"><div class="th-shell"><button class="column-sort-button" type="button" data-column="process">Proces <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="process" aria-label="Filtruj proces"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="hireDate"><div class="th-shell"><button class="column-sort-button" type="button" data-column="hireDate">Data zatrudnienia <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="hireDate" aria-label="Filtruj daty zatrudnienia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
               <th>Akcja</th>
             </tr></thead>
             <tbody id="employeeRows"></tbody>
@@ -86,6 +86,6 @@
   <div id="actionModalBackdrop" class="modal-backdrop" hidden></div>
   <section id="actionModal" class="action-modal" aria-hidden="true" aria-labelledby="actionModalTitle"><div class="modal-head"><div><p class="eyebrow">Operacja grupowa</p><h2 id="actionModalTitle">Zmień dane pracowników</h2><p id="actionModalSubtitle"></p></div><button id="actionModalClose" class="drawer-close" type="button" aria-label="Zamknij">×</button></div><form id="bulkActionForm" class="bulk-form"><div id="processFields"><label class="field"><span>Proces</span><select id="bulkProcessSelect" class="control-select" required></select></label></div><div id="availabilityFields" hidden><div class="availability-choice"><label><input type="radio" name="bulkAvailabilityState" value="true" checked><span>Dostępny</span></label><label><input type="radio" name="bulkAvailabilityState" value="false"><span>Niedostępny</span></label></div></div><div class="date-grid"><label class="field"><span>Od</span><input id="bulkDateFrom" type="date" required></label><label class="field"><span>Do</span><input id="bulkDateTo" type="date" required></label></div><label class="field"><span>Notatka <small>opcjonalnie</small></span><input id="bulkNote" type="text" maxlength="500" placeholder="Powód lub komentarz do zmiany"></label><p id="bulkActionMessage" class="form-message" role="status" aria-live="polite"></p><div class="modal-actions"><button id="bulkActionCancel" class="secondary-button" type="button">Anuluj</button><button id="bulkActionSave" class="primary-button compact" type="submit"><span>Zapisz dla zaznaczonych</span><span>→</span></button></div></form></section>
 
-  <script src="employees-v2.js?v=20260912.1"></script>
+  <script src="employees-v3.js?v=20260912.1"></script>
 </body>
 </html>
