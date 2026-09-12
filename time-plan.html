@@ -7,6 +7,7 @@
   <title>Workplan — Plan pracy</title>
   <link rel="stylesheet" href="styles.css?v=20260912.3">
   <link rel="stylesheet" href="time-plan.css?v=20260912.4">
+  <link rel="stylesheet" href="time-plan-patch.css?v=20260912.1">
 </head>
 <body class="app-page" data-page="time-plan">
   <div class="app-shell">
@@ -27,7 +28,7 @@
     <main class="dashboard time-dashboard">
       <header class="topbar time-topbar">
         <button id="menuToggle" class="menu-toggle" type="button" aria-label="Otwórz menu">☰</button>
-        <div class="time-title"><p class="eyebrow">Obsada i godziny</p><h1>Czas pracy i zapotrzebowanie</h1><p>Ustaw godziny potrzebne na każdej zmianie, a potem dobierz ludzi do procesu.</p></div>
+        <div class="time-title"><p class="eyebrow">Obsada i godziny</p><h1>Czas pracy i zapotrzebowanie</h1><p>Ustaw zapotrzebowanie na cały dzień, rozdziel je na zmiany, a potem dobierz ludzi do procesu.</p></div>
         <div class="user-menu"><div class="avatar" id="userAvatar">U</div><div class="user-meta"><strong id="userDisplay">Użytkownik</strong><span>Workplan</span></div><button id="logoutBtn" class="secondary-button" type="button">Wyloguj</button></div>
       </header>
 
@@ -49,7 +50,7 @@
       </section>
 
       <section class="panel demand-panel">
-        <div class="section-head"><div><p class="eyebrow">Procesy</p><h2>Zapotrzebowanie i obsada</h2><p>Wpisuj zapotrzebowanie osobno przy każdej zmianie. Suma procesu liczy się automatycznie.</p></div></div>
+        <div class="section-head"><div><p class="eyebrow">Procesy</p><h2>Zapotrzebowanie i obsada</h2><p>Najpierw wpisz zapotrzebowanie całego dnia. Następnie rozdziel dokładnie tę liczbę godzin między dostępne zmiany.</p></div></div>
         <div id="demandGrid" class="demand-grid"></div>
       </section>
 
@@ -122,5 +123,6 @@
   </aside>
 
   <script src="time-plan.js?v=20260912.4"></script>
+  <script src="time-plan-patch.js?v=20260912.1"></script>
 </body>
 </html>
