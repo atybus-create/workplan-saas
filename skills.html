@@ -6,7 +6,8 @@
   <meta name="color-scheme" content="dark">
   <title>Workplan — Skill Hub</title>
   <link rel="stylesheet" href="styles.css?v=20260912.3">
-  <link rel="stylesheet" href="skill-hub.css?v=20260912.1">
+  <link rel="stylesheet" href="skill-hub.css?v=20260912.2">
+  <link rel="stylesheet" href="skill-grid.css?v=20260912.1">
 </head>
 <body class="app-page skill-page" data-page="skills">
   <div class="app-shell">
@@ -16,9 +17,9 @@
         <a class="nav-item" href="start.html"><span class="nav-icon">⌂</span><span>Start</span></a>
         <a class="nav-item" href="employees.html"><span class="nav-icon">◎</span><span>Pracownicy</span></a>
         <a class="nav-item active" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>
+        <a class="nav-item" href="time-plan.html"><span class="nav-icon">◷</span><span>Plan pracy</span></a>
         <button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>
         <button class="nav-item" type="button" disabled><span class="nav-icon">▦</span><span>Planowanie</span></button>
-        <button class="nav-item" type="button" disabled><span class="nav-icon">◷</span><span>Czas pracy</span></button>
         <button class="nav-item" type="button" disabled><span class="nav-icon">↗</span><span>Raporty</span></button>
       </nav>
       <div class="sidebar-bottom"><button class="nav-item" type="button" disabled><span class="nav-icon">⚙</span><span>Ustawienia</span></button></div>
@@ -33,17 +34,17 @@
 
       <section class="skill-summary" aria-label="Podsumowanie katalogu skilli">
         <article><span>Wszystkie skille</span><strong id="skillTotal">—</strong><small>Katalog kompetencji</small></article>
-        <article class="good"><span>Aktywne</span><strong id="skillActive">—</strong><small>Dostępne do przypisania</small></article>
+        <article class="good"><span>Aktywne</span><strong id="skillActiveCount">—</strong><small>Dostępne do przypisania</small></article>
         <article class="muted-card"><span>Nieaktywne</span><strong id="skillInactive">—</strong><small>Zachowane w historii</small></article>
         <article><span>Przypisania</span><strong id="skillAssignments">—</strong><small>Skille pracowników</small></article>
       </section>
 
       <section class="panel skill-catalog-panel">
         <div class="skill-toolbar">
-          <div><p class="eyebrow">Katalog</p><h2>Standardy kompetencji</h2></div>
+          <div><p class="eyebrow">Katalog</p><h2>Standardy kompetencji</h2><p class="skill-toolbar-note">Sortowanie i ograniczanie widoku działa bezpośrednio z nagłówków kolumn.</p></div>
           <div class="skill-controls">
             <label class="skill-search"><span>⌕</span><input id="skillSearch" type="search" placeholder="Szukaj po nazwie, opisie lub onboardingu" autocomplete="off"></label>
-            <div class="status-filter" role="group" aria-label="Status skilla"><button class="active" type="button" data-status="all">Wszystkie</button><button type="button" data-status="active">Aktywne</button><button type="button" data-status="inactive">Nieaktywne</button></div>
+            <div class="status-filter" role="group" aria-label="Szybki filtr statusu"><button class="active" type="button" data-status="all">Wszystkie</button><button type="button" data-status="active">Aktywne</button><button type="button" data-status="inactive">Nieaktywne</button></div>
           </div>
         </div>
 
@@ -51,7 +52,15 @@
         <div id="skillError" class="skill-state error" hidden></div>
         <div id="skillTableWrap" class="skill-table-wrap" hidden>
           <table class="skill-table">
-            <thead><tr><th>Skill</th><th>Status</th><th>Trudność</th><th>Szkolenie</th><th>Przypisania</th><th>Kategoria</th><th></th></tr></thead>
+            <thead><tr>
+              <th class="filterable-th" data-column="name"><div class="th-shell"><button class="column-sort-button" type="button" data-column="name">Skill <span class="sort-indicator">↑</span></button><button class="column-filter-button" type="button" data-column="name" aria-label="Filtruj skille"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="status"><div class="th-shell"><button class="column-sort-button" type="button" data-column="status">Status <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="status" aria-label="Filtruj status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="difficulty"><div class="th-shell"><button class="column-sort-button" type="button" data-column="difficulty">Trudność <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="difficulty" aria-label="Filtruj trudność"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="training"><div class="th-shell"><button class="column-sort-button" type="button" data-column="training">Szkolenie <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="training" aria-label="Filtruj czas szkolenia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="assignments"><div class="th-shell"><button class="column-sort-button" type="button" data-column="assignments">Przypisania <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="assignments" aria-label="Filtruj liczbę przypisań"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th class="filterable-th" data-column="category"><div class="th-shell"><button class="column-sort-button" type="button" data-column="category">Kategoria <span class="sort-indicator">↕</span></button><button class="column-filter-button" type="button" data-column="category" aria-label="Filtruj kategorie"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16l-6.2 7.1V19l-3.6-1.8v-4.1z"/></svg><span class="filter-count" hidden></span></button></div></th>
+              <th>Akcja</th>
+            </tr></thead>
             <tbody id="skillRows"></tbody>
           </table>
         </div>
@@ -59,17 +68,16 @@
     </main>
   </div>
 
+  <div id="skillColumnFilterPopover" class="skill-column-filter-popover" hidden></div>
+
   <div id="skillBackdrop" class="skill-backdrop" hidden></div>
   <aside id="skillDrawer" class="skill-drawer" aria-hidden="true">
     <div class="skill-drawer-head"><div><p class="eyebrow" id="drawerModeLabel">Edycja skilla</p><h2 id="skillDrawerTitle">Skill</h2><span id="skillDrawerMeta"></span></div><button id="skillDrawerClose" class="skill-close" type="button" aria-label="Zamknij">×</button></div>
     <form id="skillForm" class="skill-form">
       <input id="skillId" type="hidden">
       <section class="skill-form-section"><h3>Podstawy</h3><div class="skill-form-grid"><label class="field wide"><span>Nazwa skilla</span><input id="skillName" type="text" maxlength="120" required placeholder="np. Kontrola jakości zamówienia"></label><label class="field"><span>Kategoria <small>opcjonalnie</small></span><input id="skillCategory" type="text" maxlength="80" placeholder="np. Pakowanie"></label><label class="field"><span>Status</span><select id="skillActive" class="control-select"><option value="true">Aktywny</option><option value="false">Nieaktywny</option></select></label></div><label class="field"><span>Krótki opis</span><textarea id="skillDescription" rows="3" maxlength="500" required placeholder="Krótko: czego dotyczy ta kompetencja?"></textarea></label></section>
-
       <section class="skill-form-section onboarding-section"><div class="section-marker">ONBOARDING</div><h3>Kryterium uzyskania skilla</h3><p>Opisz konkretnie, co pracownik musi znać i potrafić, żeby uznać kompetencję za opanowaną.</p><label class="field"><textarea id="skillOnboarding" rows="10" maxlength="5000" required placeholder="Np. pracownik samodzielnie wykonuje proces, zna wyjątki, potrafi rozpoznać błędy i wie, kiedy eskalować problem…"></textarea></label></section>
-
       <section class="skill-form-section"><h3>Parametry szkolenia</h3><div class="skill-form-grid"><label class="field"><span>Poziom trudności</span><select id="skillDifficulty" class="control-select" required><option value="1">1 — podstawowy</option><option value="2">2 — łatwy</option><option value="3">3 — średni</option><option value="4">4 — trudny</option><option value="5">5 — ekspercki</option></select></label><label class="field"><span>Czas szkolenia</span><div class="time-input"><input id="skillTrainingMinutes" type="number" min="0" max="100000" step="15" required value="60"><span>min</span></div></label><label class="field"><span>Kolejność</span><input id="skillSortOrder" type="number" min="0" step="1" value="0"></label></div></section>
-
       <p id="skillFormMessage" class="form-message" role="status" aria-live="polite"></p>
       <div class="skill-form-actions"><button id="deleteSkillBtn" class="danger-button" type="button">Usuń skill</button><div><button id="cancelSkillBtn" class="secondary-button" type="button">Anuluj</button><button id="saveSkillBtn" class="primary-button" type="submit">Zapisz skill</button></div></div>
     </form>
@@ -77,9 +85,9 @@
 
   <div id="deleteSkillBackdrop" class="skill-modal-backdrop" hidden></div>
   <section id="deleteSkillModal" class="skill-modal" aria-hidden="true">
-    <div class="delete-symbol">!</div><p class="eyebrow">Trwałe usunięcie</p><h2>Usunąć skill?</h2><p id="deleteSkillText">Skill zostanie trwale usunięty z katalogu.</p><div class="delete-note">Jeżeli skill ma historię przypisań do pracowników, system zablokuje trwałe usunięcie. W takim przypadku ustaw go jako <strong>Nieaktywny</strong>.</div><p id="deleteSkillMessage" class="form-message"></p><div class="skill-modal-actions"><button id="deleteSkillCancel" class="secondary-button" type="button">Anuluj</button><button id="deleteSkillConfirm" class="danger-button solid" type="button">Usuń trwale</button></div>
+    <div class="delete-symbol">!</div><p class="eyebrow">Trwałe usunięcie</p><h2>Usunąć skill?</h2><p id="deleteSkillText">Skill zostanie trwale usunięty z katalogu.</p><div class="delete-note">Usunięcie jest trwałe. Skill zostanie usunięty z katalogu oraz ze wszystkich przypisań pracowników. Jeżeli chcesz zachować historię i tylko wycofać kompetencję, ustaw status <strong>Nieaktywny</strong>.</div><p id="deleteSkillMessage" class="form-message"></p><div class="skill-modal-actions"><button id="deleteSkillCancel" class="secondary-button" type="button">Anuluj</button><button id="deleteSkillConfirm" class="danger-button solid" type="button">Usuń trwale</button></div>
   </section>
 
-  <script src="skill-hub.js?v=20260912.1"></script>
+  <script src="skill-hub.js?v=20260912.2"></script>
 </body>
 </html>
