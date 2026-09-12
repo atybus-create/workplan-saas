@@ -18,6 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validate frontend JavaScript
+        shell: bash
+        run: |
+          set -e
+          for file in *.js; do
+            [ -f "$file" ] || continue
+            node --check "$file"
+          done
       - name: Build navigation
         shell: python
         run: |
