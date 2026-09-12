@@ -22,13 +22,24 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          link = '<a class="nav-item" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>'
+          skill_link = '<a class="nav-item" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>'
+          time_link = '<a class="nav-item" href="time-plan.html"><span class="nav-icon">◷</span><span>Plan pracy</span></a>'
           for name in ('start.html', 'employees.html'):
               p = Path(name)
               text = p.read_text(encoding='utf-8')
               if 'href="skills.html"' not in text:
                   marker = '<button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>'
-                  text = text.replace(marker, link + '\n        ' + marker, 1)
+                  text = text.replace(marker, skill_link + '\n        ' + marker, 1)
+              if 'href="time-plan.html"' not in text:
+                  marker = '<button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>'
+                  text = text.replace(marker, time_link + '\n        ' + marker, 1)
+              p.write_text(text, encoding='utf-8')
+          p = Path('skills.html')
+          if p.exists():
+              text = p.read_text(encoding='utf-8')
+              if 'href="time-plan.html"' not in text:
+                  marker = '<button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>'
+                  text = text.replace(marker, time_link + '\n        ' + marker, 1)
                   p.write_text(text, encoding='utf-8')
       - uses: actions/configure-pages@v5
         with:
