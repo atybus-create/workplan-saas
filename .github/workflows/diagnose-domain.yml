@@ -1,5 +1,9 @@
 name: Diagnose custom domain
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-domain.yml'
   workflow_dispatch:
 permissions:
   contents: read
