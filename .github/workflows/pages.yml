@@ -15,7 +15,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate frontend JavaScript
@@ -26,40 +26,64 @@ jobs:
             [ -f "$file" ] || continue
             node --check "$file"
           done
-      - name: Build navigation
+      - name: Normalize navigation
         shell: python
         run: |
           from pathlib import Path
           import re
-          skill_link = '<a class="nav-item" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>'
-          process_link = '<a class="nav-item" href="process-hub.html"><span class="nav-icon">▧</span><span>Proces Hub</span></a>'
-          time_link = '<a class="nav-item" href="time-plan.html"><span class="nav-icon">◷</span><span>Plan pracy</span></a>'
-          day_link = '<a class="nav-item" href="day-plan.html"><span class="nav-icon">▤</span><span>Plan dnia</span></a>'
-          marker = '<button class="nav-item" type="button" disabled><span class="nav-icon">◇</span><span>Obszary pracy</span></button>'
-          for name in ('start.html', 'employees.html', 'skills.html', 'process-hub.html', 'time-plan.html', 'day-plan.html'):
-              p = Path(name)
-              if not p.exists():
+
+          pages = (
+              'start.html',
+              'employees.html',
+              'skills.html',
+              'process-hub.html',
+              'time-plan.html',
+              'day-plan.html',
+          )
+
+          items = (
+              ('start.html', '⌂', 'Start'),
+              ('employees.html', '◎', 'Pracownicy'),
+              ('skills.html', '◆', 'Skill Hub'),
+              ('process-hub.html', '▧', 'Proces Hub'),
+              ('time-plan.html', '◷', 'Plan pracy'),
+              ('day-plan.html', '▤', 'Plan dnia'),
+          )
+
+          for name in pages:
+              path = Path(name)
+              if not path.exists():
                   continue
-              text = p.read_text(encoding='utf-8')
-              if 'href="skills.html"' not in text:
-                  text = text.replace(marker, skill_link + '\n        ' + marker, 1)
-              if 'href="process-hub.html"' not in text:
-                  lines = text.splitlines()
-                  time_index = next((i for i, line in enumerate(lines) if 'href="time-plan.html"' in line), None)
-                  if time_index is not None:
-                      indent = lines[time_index][:len(lines[time_index]) - len(lines[time_index].lstrip())]
-                      lines.insert(time_index, indent + process_link)
-                      text = '\n'.join(lines) + ('\n' if text.endswith('\n') else '')
-                  else:
-                      text = text.replace(marker, process_link + '\n        ' + marker, 1)
-              if 'href="time-plan.html"' not in text:
-                  text = text.replace(marker, time_link + '\n        ' + marker, 1)
-              if 'href="day-plan.html"' not in text:
-                  pattern = r'(<a\b[^>]*href="time-plan\.html"[^>]*>.*?</a>)'
-                  text, count = re.subn(pattern, r'\1\n        ' + day_link, text, count=1, flags=re.S)
-                  if not count:
-                      text = text.replace(marker, day_link + '\n        ' + marker, 1)
-              p.write_text(text, encoding='utf-8')
+
+              text = path.read_text(encoding='utf-8')
+              links = []
+              for href, icon, label in items:
+                  active = ' active' if href == name else ''
+                  links.append(
+                      f'        <a class="nav-item{active}" href="{href}"><span class="nav-icon">{icon}</span><span>{label}</span></a>'
+                  )
+
+              nav = '<nav class="main-nav" aria-label="Główna nawigacja">\n' + '\n'.join(links) + '\n      </nav>'
+              text, replaced = re.subn(
+                  r'<nav\b[^>]*class="main-nav"[^>]*>.*?</nav>',
+                  nav,
+                  text,
+                  count=1,
+                  flags=re.S,
+              )
+
+              if replaced != 1:
+                  raise RuntimeError(f'Nie znaleziono głównej nawigacji w {name}')
+
+              text = re.sub(
+                  r'\s*<div class="sidebar-bottom">.*?</div>',
+                  '',
+                  text,
+                  count=1,
+                  flags=re.S,
+              )
+
+              path.write_text(text, encoding='utf-8')
       - uses: actions/configure-pages@v5
         with:
           enablement: true
