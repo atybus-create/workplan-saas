@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Workplan — Plan dnia</title>
+  <link rel="stylesheet" href="styles.css?v=20260913.1">
+  <link rel="stylesheet" href="day-plan.css?v=20260913.1">
+</head>
+<body class="app-page" data-page="day-plan">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-lockup sidebar-brand"><span class="brand-mark">W</span><span>Workplan</span></div>
+      <nav class="main-nav" aria-label="Główna nawigacja">
+        <a class="nav-item" href="start.html"><span class="nav-icon">⌂</span><span>Start</span></a>
+        <a class="nav-item" href="employees.html"><span class="nav-icon">◎</span><span>Pracownicy</span></a>
+        <a class="nav-item" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>
+        <a class="nav-item" href="process-hub.html"><span class="nav-icon">▧</span><span>Proces Hub</span></a>
+        <a class="nav-item" href="time-plan.html"><span class="nav-icon">◷</span><span>Plan pracy</span></a>
+        <a class="nav-item active" href="day-plan.html"><span class="nav-icon">▤</span><span>Plan dnia</span></a>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">▦</span><span>Planowanie</span></button>
+        <button class="nav-item" type="button" disabled><span class="nav-icon">↗</span><span>Raporty</span></button>
+      </nav>
+      <div class="sidebar-bottom"><button class="nav-item" type="button" disabled><span class="nav-icon">⚙</span><span>Ustawienia</span></button></div>
+    </aside>
+
+    <main class="dashboard day-dashboard">
+      <header class="topbar day-topbar">
+        <button id="menuToggle" class="menu-toggle" type="button" aria-label="Otwórz menu">☰</button>
+        <div class="day-title">
+          <p class="eyebrow">Widok operacyjny</p>
+          <h1>Plan dnia</h1>
+          <p>Jedno miejsce do sprawdzenia zmian, procesów, zapotrzebowania i przypisanej obsady. Ten ekran jest tylko do odczytu.</p>
+        </div>
+        <div class="user-menu">
+          <div class="avatar" id="userAvatar">U</div>
+          <div class="user-meta"><strong id="userDisplay">Użytkownik</strong><span>Workplan</span></div>
+          <button id="logoutBtn" class="secondary-button" type="button">Wyloguj</button>
+        </div>
+      </header>
+
+      <section class="day-command-bar">
+        <div class="day-date-nav">
+          <button id="dayPrev" type="button" aria-label="Poprzedni dzień">←</button>
+          <label><span>Dzień planu</span><input id="dayPlanDate" type="date"></label>
+          <button id="dayNext" type="button" aria-label="Następny dzień">→</button>
+          <button id="dayToday" class="secondary-button" type="button">Dzisiaj</button>
+        </div>
+        <div class="day-export-actions">
+          <span class="day-readonly-note">Dane z Planu pracy</span>
+          <button id="exportDayExcel" class="secondary-button export-button" type="button"><strong>↧</strong> Excel</button>
+          <button id="exportDayPdf" class="secondary-button export-button" type="button"><strong>↧</strong> PDF</button>
+        </div>
+      </section>
+
+      <div id="dayPlanReport">
+        <div style="display:none" id="reportDateLabel"></div>
+
+        <section class="day-summary" aria-label="Podsumowanie dnia">
+          <article><span>Aktywne zmiany</span><strong id="daySummaryShifts">—</strong><small>skonfigurowane na dzień</small></article>
+          <article><span>Zapotrzebowanie</span><strong id="daySummaryRequired">—</strong><small>godzin pracy łącznie</small></article>
+          <article class="summary-balance"><span>Przypisano</span><strong id="daySummaryAssigned">—</strong><small id="daySummaryBalanceText">—</small></article>
+          <article><span>Pracownicy</span><strong id="daySummaryPeople">—</strong><small>unikalne osoby w planie</small></article>
+        </section>
+
+        <section class="coverage-ribbon">
+          <div class="coverage-ribbon-head"><strong>Pokrycie zmian</strong><span>przypisane godziny / zapotrzebowanie</span></div>
+          <div id="dayCoverageRibbon" class="coverage-ribbon-track"></div>
+        </section>
+
+        <section id="dayShiftBoards" class="day-report" aria-label="Plan zmian i procesów"></section>
+
+        <section class="panel day-process-summary">
+          <div class="section-head">
+            <div><p class="eyebrow">Bilans procesów</p><h2>Cały dzień</h2><p>Podsumowanie godzin dla każdego procesu niezależnie od zmiany.</p></div>
+          </div>
+          <div id="dayProcessSummaryGrid" class="day-process-summary-grid"></div>
+        </section>
+      </div>
+
+      <p id="dayPlanMessage" class="page-message" role="status" aria-live="polite"></p>
+    </main>
+  </div>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+  <script defer src="day-plan.js?v=20260913.1"></script>
+</body>
+</html>
