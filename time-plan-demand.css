@@ -1,0 +1,41 @@
+.demand-persist-state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+
+.demand-persist-state span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 999px;
+  background: rgba(255,255,255,.035);
+  color: #a9b3c1;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.demand-persist-state span.saved {
+  border-color: rgba(56, 201, 136, .34);
+  color: #77e3b0;
+  background: rgba(56, 201, 136, .08);
+}
+
+.demand-persist-state span.dirty {
+  border-color: rgba(255, 176, 76, .40);
+  color: #ffc06a;
+  background: rgba(255, 176, 76, .08);
+}
+
+.demand-actions .demand-save-day,
+.demand-actions .demand-save-shifts {
+  white-space: nowrap;
+}
+
+.demand-actions button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+}
