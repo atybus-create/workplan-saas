@@ -2,127 +2,730 @@
 <html lang="pl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
   <meta name="color-scheme" content="dark">
+
   <title>Workplan — Plan pracy</title>
-  <link rel="stylesheet" href="styles.css?v=20260912.3">
-  <link rel="stylesheet" href="time-plan.css?v=20260912.4">
-  <link rel="stylesheet" href="time-plan-patch.css?v=20260912.1">
+
+  <link
+    rel="stylesheet"
+    href="styles.css?v=20260912.3"
+  >
+
+  <link
+    rel="stylesheet"
+    href="time-plan.css?v=20260912.4"
+  >
+
+  <link
+    rel="stylesheet"
+    href="time-plan-patch.css?v=20260912.1"
+  >
 </head>
-<body class="app-page" data-page="time-plan">
+
+<body
+  class="app-page"
+  data-page="time-plan"
+>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand-lockup sidebar-brand"><span class="brand-mark">W</span><span>Workplan</span></div>
-      <nav class="main-nav" aria-label="Główna nawigacja">
-        <a class="nav-item" href="start.html"><span class="nav-icon">⌂</span><span>Start</span></a>
-        <a class="nav-item" href="employees.html"><span class="nav-icon">◎</span><span>Pracownicy</span></a>
-        <a class="nav-item" href="skills.html"><span class="nav-icon">◆</span><span>Skill Hub</span></a>
-        <a class="nav-item" href="process-hub.html"><span class="nav-icon">▧</span><span>Proces Hub</span></a>
-        <a class="nav-item active" href="time-plan.html"><span class="nav-icon">◷</span><span>Plan pracy</span></a>
-        <button class="nav-item" type="button" disabled><span class="nav-icon">▦</span><span>Planowanie</span></button>
-        <button class="nav-item" type="button" disabled><span class="nav-icon">↗</span><span>Raporty</span></button>
+      <div class="brand-lockup sidebar-brand">
+        <span class="brand-mark">W</span>
+        <span>Workplan</span>
+      </div>
+
+      <nav
+        class="main-nav"
+        aria-label="Główna nawigacja"
+      >
+        <a
+          class="nav-item"
+          href="start.html"
+        >
+          <span class="nav-icon">⌂</span>
+          <span>Start</span>
+        </a>
+
+        <a
+          class="nav-item"
+          href="employees.html"
+        >
+          <span class="nav-icon">◎</span>
+          <span>Pracownicy</span>
+        </a>
+
+        <a
+          class="nav-item"
+          href="skills.html"
+        >
+          <span class="nav-icon">◆</span>
+          <span>Skill Hub</span>
+        </a>
+
+        <a
+          class="nav-item"
+          href="process-hub.html"
+        >
+          <span class="nav-icon">▧</span>
+          <span>Proces Hub</span>
+        </a>
+
+        <a
+          class="nav-item active"
+          href="time-plan.html"
+        >
+          <span class="nav-icon">◷</span>
+          <span>Plan pracy</span>
+        </a>
+
+        <button
+          class="nav-item"
+          type="button"
+          disabled
+        >
+          <span class="nav-icon">▦</span>
+          <span>Planowanie</span>
+        </button>
+
+        <button
+          class="nav-item"
+          type="button"
+          disabled
+        >
+          <span class="nav-icon">↗</span>
+          <span>Raporty</span>
+        </button>
       </nav>
-      <div class="sidebar-bottom"><button class="nav-item" type="button" disabled><span class="nav-icon">⚙</span><span>Ustawienia</span></button></div>
+
+      <div class="sidebar-bottom">
+        <button
+          class="nav-item"
+          type="button"
+          disabled
+        >
+          <span class="nav-icon">⚙</span>
+          <span>Ustawienia</span>
+        </button>
+      </div>
     </aside>
 
     <main class="dashboard time-dashboard">
       <header class="topbar time-topbar">
-        <button id="menuToggle" class="menu-toggle" type="button" aria-label="Otwórz menu">☰</button>
-        <div class="time-title"><p class="eyebrow">Obsada i godziny</p><h1>Czas pracy i zapotrzebowanie</h1><p>Ustaw zapotrzebowanie na cały dzień, rozdziel je na zmiany, a potem dobierz ludzi do procesu.</p></div>
-        <div class="user-menu"><div class="avatar" id="userAvatar">U</div><div class="user-meta"><strong id="userDisplay">Użytkownik</strong><span>Workplan</span></div><button id="logoutBtn" class="secondary-button" type="button">Wyloguj</button></div>
+        <button
+          id="menuToggle"
+          class="menu-toggle"
+          type="button"
+          aria-label="Otwórz menu"
+        >
+          ☰
+        </button>
+
+        <div class="time-title">
+          <p class="eyebrow">
+            Obsada i godziny
+          </p>
+
+          <h1>
+            Czas pracy i zapotrzebowanie
+          </h1>
+
+          <p>
+            Ustaw zapotrzebowanie na cały dzień,
+            rozdziel je na zmiany, a potem dobierz
+            ludzi do procesu.
+          </p>
+        </div>
+
+        <div class="user-menu">
+          <div
+            class="avatar"
+            id="userAvatar"
+          >
+            U
+          </div>
+
+          <div class="user-meta">
+            <strong id="userDisplay">
+              Użytkownik
+            </strong>
+
+            <span>Workplan</span>
+          </div>
+
+          <button
+            id="logoutBtn"
+            class="secondary-button"
+            type="button"
+          >
+            Wyloguj
+          </button>
+        </div>
       </header>
 
       <section class="date-command-bar">
-        <div class="date-nav"><button id="prevDay" type="button">←</button><label><span>Dzień planu</span><input id="planDate" type="date"></label><button id="nextDay" type="button">→</button><button id="todayBtn" class="secondary-button" type="button">Dzisiaj</button></div>
-        <div class="date-actions"><button id="shiftTemplatesBtn" class="secondary-button" type="button">Szablony zmian</button><button id="configureShiftsBtn" class="primary-button" type="button">Konfiguruj zmiany</button></div>
+        <div class="date-nav">
+          <button
+            id="prevDay"
+            type="button"
+          >
+            ←
+          </button>
+
+          <label>
+            <span>Dzień planu</span>
+
+            <input
+              id="planDate"
+              type="date"
+            >
+          </label>
+
+          <button
+            id="nextDay"
+            type="button"
+          >
+            →
+          </button>
+
+          <button
+            id="todayBtn"
+            class="secondary-button"
+            type="button"
+          >
+            Dzisiaj
+          </button>
+        </div>
+
+        <div class="date-actions">
+          <button
+            id="shiftTemplatesBtn"
+            class="secondary-button"
+            type="button"
+          >
+            Szablony zmian
+          </button>
+
+          <button
+            id="configureShiftsBtn"
+            class="primary-button"
+            type="button"
+          >
+            Konfiguruj zmiany
+          </button>
+        </div>
       </section>
 
-      <section class="time-summary" aria-label="Podsumowanie planu">
-        <article><span>Aktywne zmiany</span><strong id="summaryShifts">—</strong><small>maks. 6 dziennie</small></article>
-        <article><span>Zapotrzebowanie</span><strong id="summaryRequired">—</strong><small>godzin pracy</small></article>
-        <article><span>Przypisano</span><strong id="summaryAssigned">—</strong><small>godzin pracy</small></article>
-        <article><span>Osoby w planie</span><strong id="summaryEmployees">—</strong><small>unikalne osoby</small></article>
+      <section
+        class="time-summary"
+        aria-label="Podsumowanie planu"
+      >
+        <article>
+          <span>Aktywne zmiany</span>
+          <strong id="summaryShifts">—</strong>
+          <small>maks. 6 dziennie</small>
+        </article>
+
+        <article>
+          <span>Zapotrzebowanie</span>
+          <strong id="summaryRequired">—</strong>
+          <small>godzin pracy</small>
+        </article>
+
+        <article>
+          <span>Przypisano</span>
+          <strong id="summaryAssigned">—</strong>
+          <small>godzin pracy</small>
+        </article>
+
+        <article>
+          <span>Osoby w planie</span>
+          <strong id="summaryEmployees">—</strong>
+          <small>unikalne osoby</small>
+        </article>
       </section>
 
       <section class="panel shift-panel">
-        <div class="section-head"><div><p class="eyebrow">Zmiany</p><h2>Godziny pracy w tym dniu</h2><p>Kliknij zmianę, żeby edytować konfigurację dnia. Szablonem możesz skopiować układ na kolejne dni lub tygodnie.</p></div></div>
-        <div id="shiftStrip" class="shift-strip"></div>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">
+              Zmiany
+            </p>
+
+            <h2>
+              Godziny pracy w tym dniu
+            </h2>
+
+            <p>
+              Kliknij zmianę, żeby edytować
+              konfigurację dnia. Szablonem możesz
+              skopiować układ na kolejne dni lub
+              tygodnie.
+            </p>
+          </div>
+        </div>
+
+        <div
+          id="shiftStrip"
+          class="shift-strip"
+        ></div>
       </section>
 
       <section class="panel demand-panel">
-        <div class="section-head"><div><p class="eyebrow">Procesy</p><h2>Zapotrzebowanie i obsada</h2><p>Najpierw wpisz zapotrzebowanie całego dnia. Następnie rozdziel dokładnie tę liczbę godzin między dostępne zmiany.</p></div></div>
-        <div id="demandGrid" class="demand-grid"></div>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">
+              Procesy
+            </p>
+
+            <h2>
+              Zapotrzebowanie i obsada
+            </h2>
+
+            <p>
+              Najpierw wpisz zapotrzebowanie całego
+              dnia. Następnie rozdziel dokładnie tę
+              liczbę godzin między dostępne zmiany.
+            </p>
+          </div>
+        </div>
+
+        <div
+          id="demandGrid"
+          class="demand-grid"
+        ></div>
       </section>
 
-      <p id="pageMessage" class="page-message" role="status" aria-live="polite"></p>
+      <p
+        id="pageMessage"
+        class="page-message"
+        role="status"
+        aria-live="polite"
+      ></p>
     </main>
   </div>
 
-  <div id="shiftBackdrop" class="time-backdrop" hidden></div>
-  <aside id="shiftDrawer" class="time-drawer" aria-hidden="true">
-    <div class="time-drawer-head"><div><p class="eyebrow">Konfiguracja dnia</p><h2>Zmiany robocze</h2><span>Maksymalnie 6 zmian. Ustawienia są zapisywane historycznie.</span></div><button id="shiftDrawerClose" class="drawer-close" type="button">×</button></div>
-    <form id="shiftForm" class="shift-form">
-      <label class="field shift-count"><span>Liczba aktywnych zmian</span><select id="shiftCount" class="control-select"><option value="1">1 zmiana</option><option value="2">2 zmiany</option><option value="3">3 zmiany</option><option value="4">4 zmiany</option><option value="5">5 zmian</option><option value="6">6 zmian</option></select></label>
-      <div id="shiftEditorRows" class="shift-editor-rows"></div>
-      <p id="shiftMessage" class="form-message"></p>
-      <div class="drawer-actions"><button id="shiftCancel" class="secondary-button" type="button">Anuluj</button><button id="shiftSave" class="primary-button" type="submit">Zapisz konfigurację</button></div>
+  <div
+    id="shiftBackdrop"
+    class="time-backdrop"
+    hidden
+  ></div>
+
+  <aside
+    id="shiftDrawer"
+    class="time-drawer"
+    aria-hidden="true"
+  >
+    <div class="time-drawer-head">
+      <div>
+        <p class="eyebrow">
+          Konfiguracja dnia
+        </p>
+
+        <h2>Zmiany robocze</h2>
+
+        <span>
+          Maksymalnie 6 zmian. Ustawienia są
+          zapisywane historycznie.
+        </span>
+      </div>
+
+      <button
+        id="shiftDrawerClose"
+        class="drawer-close"
+        type="button"
+      >
+        ×
+      </button>
+    </div>
+
+    <form
+      id="shiftForm"
+      class="shift-form"
+    >
+      <label class="field shift-count">
+        <span>Liczba aktywnych zmian</span>
+
+        <select
+          id="shiftCount"
+          class="control-select"
+        >
+          <option value="1">1 zmiana</option>
+          <option value="2">2 zmiany</option>
+          <option value="3">3 zmiany</option>
+          <option value="4">4 zmiany</option>
+          <option value="5">5 zmian</option>
+          <option value="6">6 zmian</option>
+        </select>
+      </label>
+
+      <div
+        id="shiftEditorRows"
+        class="shift-editor-rows"
+      ></div>
+
+      <p
+        id="shiftMessage"
+        class="form-message"
+      ></p>
+
+      <div class="drawer-actions">
+        <button
+          id="shiftCancel"
+          class="secondary-button"
+          type="button"
+        >
+          Anuluj
+        </button>
+
+        <button
+          id="shiftSave"
+          class="primary-button"
+          type="submit"
+        >
+          Zapisz konfigurację
+        </button>
+      </div>
     </form>
   </aside>
 
-  <div id="assignBackdrop" class="time-backdrop" hidden></div>
-  <aside id="assignDrawer" class="assign-drawer" aria-hidden="true">
+  <div
+    id="assignBackdrop"
+    class="time-backdrop"
+    hidden
+  ></div>
+
+  <aside
+    id="assignDrawer"
+    class="assign-drawer"
+    aria-hidden="true"
+  >
     <div class="assign-drawer-head">
-      <div><p class="eyebrow">Przypisanie obsady</p><h2 id="assignProcessName">Proces</h2><div class="assign-process-meta"><span id="assignSkillBadge">Skill nieustawiony</span><span id="assignCoverageBadge">0 / 0 h</span></div></div>
-      <button id="assignDrawerClose" class="drawer-close" type="button" aria-label="Zamknij">×</button>
+      <div>
+        <p class="eyebrow">
+          Przypisanie obsady
+        </p>
+
+        <h2 id="assignProcessName">
+          Proces
+        </h2>
+
+        <div class="assign-process-meta">
+          <span id="assignSkillBadge">
+            Skill nieustawiony
+          </span>
+
+          <span id="assignCoverageBadge">
+            0 / 0 h
+          </span>
+        </div>
+      </div>
+
+      <button
+        id="assignDrawerClose"
+        class="drawer-close"
+        type="button"
+        aria-label="Zamknij"
+      >
+        ×
+      </button>
     </div>
+
     <div class="assign-body">
       <section class="assign-step people-step">
-        <div class="assign-step-head"><span class="step-no">1</span><div><strong>Wybierz dostępne osoby</strong><small>Najpierw osoby z wymaganym skillem. Przy każdej osobie widzisz wszystkie jej skille.</small></div></div>
-        <label class="assign-search"><span>⌕</span><input id="assignEmployeeSearch" type="search" placeholder="Szukaj pracownika lub skilla" autocomplete="off"></label>
+        <div class="assign-step-head">
+          <span class="step-no">1</span>
+
+          <div>
+            <strong>
+              Wybierz dostępne osoby
+            </strong>
+
+            <small>
+              Najpierw osoby z wymaganym skillem.
+              Przy każdej osobie widzisz wszystkie
+              jej skille.
+            </small>
+          </div>
+        </div>
+
+        <label class="assign-search">
+          <span>⌕</span>
+
+          <input
+            id="assignEmployeeSearch"
+            type="search"
+            placeholder="Szukaj pracownika lub skilla"
+            autocomplete="off"
+          >
+        </label>
+
         <div id="assignPeople"></div>
       </section>
 
       <section class="assign-step">
-        <div class="assign-step-head"><span class="step-no">2</span><div><strong>Przypisz zmianę</strong><small>Wybierz jedną ze zmian skonfigurowanych u góry dla tego dnia.</small></div></div>
-        <div id="assignShiftTabs" class="assign-shift-tabs"></div>
+        <div class="assign-step-head">
+          <span class="step-no">2</span>
+
+          <div>
+            <strong>
+              Przypisz zmianę
+            </strong>
+
+            <small>
+              Wybierz jedną ze zmian
+              skonfigurowanych u góry dla tego dnia.
+            </small>
+          </div>
+        </div>
+
+        <div
+          id="assignShiftTabs"
+          class="assign-shift-tabs"
+        ></div>
       </section>
 
       <div class="assign-footer">
-        <div><strong id="assignSelectedCount">0 osób</strong><span id="assignSelectedHours">0 h do przypisania</span></div>
-        <button id="assignSelectedBtn" class="primary-button" type="button">Przypisz do zmiany</button>
+        <div>
+          <strong id="assignSelectedCount">
+            0 osób
+          </strong>
+
+          <span id="assignSelectedHours">
+            0 h do przypisania
+          </span>
+        </div>
+
+        <button
+          id="assignSelectedBtn"
+          class="primary-button"
+          type="button"
+        >
+          Przypisz do zmiany
+        </button>
       </div>
-      <p id="assignMessage" class="form-message" role="status" aria-live="polite"></p>
+
+      <p
+        id="assignMessage"
+        class="form-message"
+        role="status"
+        aria-live="polite"
+      ></p>
     </div>
   </aside>
 
-  <div id="templateBackdrop" class="time-backdrop" hidden></div>
-  <aside id="templateDrawer" class="time-drawer template-drawer" aria-hidden="true">
-    <div class="time-drawer-head"><div><p class="eyebrow">Automatyzacja grafiku</p><h2>Szablony zmian</h2><span>Zapisz układ jednego dnia albo całego tygodnia i zastosuj go na wybrany zakres dat.</span></div><button id="templateDrawerClose" class="drawer-close" type="button">×</button></div>
+  <div
+    id="templateBackdrop"
+    class="time-backdrop"
+    hidden
+  ></div>
+
+  <aside
+    id="templateDrawer"
+    class="time-drawer template-drawer"
+    aria-hidden="true"
+  >
+    <div class="time-drawer-head">
+      <div>
+        <p class="eyebrow">
+          Automatyzacja grafiku
+        </p>
+
+        <h2>Szablony zmian</h2>
+
+        <span>
+          Zapisz układ jednego dnia albo całego
+          tygodnia i zastosuj go na wybrany zakres
+          dat.
+        </span>
+      </div>
+
+      <button
+        id="templateDrawerClose"
+        class="drawer-close"
+        type="button"
+      >
+        ×
+      </button>
+    </div>
+
     <div class="template-body">
       <section class="template-create-card">
-        <div><p class="eyebrow">Nowy szablon</p><h3>Zapisz aktualny układ</h3><p>Dzień zapisuje zmiany z wybranej daty. Tydzień pobiera układ od poniedziałku do niedzieli.</p></div>
-        <label class="field"><span>Nazwa szablonu</span><input id="templateName" type="text" maxlength="120" placeholder="np. Standard magazyn"></label>
-        <label class="field"><span>Zakres szablonu</span><select id="templateScope" class="control-select"><option value="day">Jeden dzień</option><option value="week">Cały tydzień</option></select></label>
-        <button id="templateSaveBtn" class="primary-button" type="button">Zapisz szablon</button>
-        <p id="templateMessage" class="form-message" role="status" aria-live="polite"></p>
+        <div>
+          <p class="eyebrow">
+            Nowy szablon
+          </p>
+
+          <h3>
+            Zapisz aktualny układ
+          </h3>
+
+          <p>
+            Dzień zapisuje zmiany z wybranej daty.
+            Tydzień pobiera układ od poniedziałku
+            do niedzieli.
+          </p>
+        </div>
+
+        <label class="field">
+          <span>Nazwa szablonu</span>
+
+          <input
+            id="templateName"
+            type="text"
+            maxlength="120"
+            placeholder="np. Standard magazyn"
+          >
+        </label>
+
+        <label class="field">
+          <span>Zakres szablonu</span>
+
+          <select
+            id="templateScope"
+            class="control-select"
+          >
+            <option value="day">
+              Jeden dzień
+            </option>
+
+            <option value="week">
+              Cały tydzień
+            </option>
+          </select>
+        </label>
+
+        <button
+          id="templateSaveBtn"
+          class="primary-button"
+          type="button"
+        >
+          Zapisz szablon
+        </button>
+
+        <p
+          id="templateMessage"
+          class="form-message"
+          role="status"
+          aria-live="polite"
+        ></p>
       </section>
 
       <section class="template-list-section">
-        <div class="template-section-head"><div><p class="eyebrow">Biblioteka</p><h3>Zapisane szablony</h3></div><span id="templateCount">0</span></div>
-        <div id="templateList" class="template-list"></div>
+        <div class="template-section-head">
+          <div>
+            <p class="eyebrow">
+              Biblioteka
+            </p>
+
+            <h3>
+              Zapisane szablony
+            </h3>
+          </div>
+
+          <span id="templateCount">0</span>
+        </div>
+
+        <div
+          id="templateList"
+          class="template-list"
+        ></div>
       </section>
 
-      <section id="templateApplyPanel" class="template-apply-card" hidden>
-        <div class="template-section-head"><div><p class="eyebrow">Zastosowanie</p><h3 id="templateApplyName">Szablon</h3></div><button id="templateApplyClose" class="mini-close" type="button">×</button></div>
-        <div class="template-range-grid"><label class="field"><span>Od</span><input id="templateDateFrom" type="date"></label><label class="field"><span>Do</span><input id="templateDateTo" type="date"></label></div>
-        <div class="template-presets"><button type="button" data-template-range="7">7 dni</button><button type="button" data-template-range="30">30 dni</button><button type="button" data-template-range="month">Do końca miesiąca</button></div>
-        <p class="template-warning">Zastosowanie szablonu nadpisze konfigurację zmian w wybranych dniach nową wersją historyczną. Przypisania pracowników i zapotrzebowanie procesów pozostają bez zmian.</p>
-        <button id="templateApplyBtn" class="primary-button" type="button">Zastosuj szablon</button>
+      <section
+        id="templateApplyPanel"
+        class="template-apply-card"
+        hidden
+      >
+        <div class="template-section-head">
+          <div>
+            <p class="eyebrow">
+              Zastosowanie
+            </p>
+
+            <h3 id="templateApplyName">
+              Szablon
+            </h3>
+          </div>
+
+          <button
+            id="templateApplyClose"
+            class="mini-close"
+            type="button"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="template-range-grid">
+          <label class="field">
+            <span>Od</span>
+
+            <input
+              id="templateDateFrom"
+              type="date"
+            >
+          </label>
+
+          <label class="field">
+            <span>Do</span>
+
+            <input
+              id="templateDateTo"
+              type="date"
+            >
+          </label>
+        </div>
+
+        <div class="template-presets">
+          <button
+            type="button"
+            data-template-range="7"
+          >
+            7 dni
+          </button>
+
+          <button
+            type="button"
+            data-template-range="30"
+          >
+            30 dni
+          </button>
+
+          <button
+            type="button"
+            data-template-range="month"
+          >
+            Do końca miesiąca
+          </button>
+        </div>
+
+        <p class="template-warning">
+          Zastosowanie szablonu nadpisze konfigurację
+          zmian w wybranych dniach nową wersją
+          historyczną. Przypisania pracowników
+          i zapotrzebowanie procesów pozostają
+          bez zmian.
+        </p>
+
+        <button
+          id="templateApplyBtn"
+          class="primary-button"
+          type="button"
+        >
+          Zastosuj szablon
+        </button>
       </section>
     </div>
   </aside>
 
-  <script src="time-plan.js?v=20260912.4"></script>
-  <script src="time-plan-patch.js?v=20260912.2"></script>
+  <!--
+    Nowe numery wersji wymuszają pobranie
+    poprawionych skryptów zamiast starego cache.
+  -->
+  <script src="time-plan.js?v=20260913.1"></script>
+  <script src="time-plan-patch.js?v=20260913.1"></script>
 </body>
 </html>
